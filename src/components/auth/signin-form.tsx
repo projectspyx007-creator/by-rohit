@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -16,11 +17,11 @@ import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/firebase";
-import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -41,30 +42,33 @@ export function SignInForm() {
     },
   });
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        router.push(searchParams.get("redirect") || "/home");
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, router, searchParams]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      initiateEmailSignIn(auth, values.email, values.password);
-      
-      const unsubscribe = auth.onAuthStateChanged(user => {
-        if(user) {
-          router.push(searchParams.get("redirect") || "/home");
-          unsubscribe();
-        }
-      });
-
+      await signInWithEmailAndPassword(auth, values.email, values.password);
+      // The useEffect will handle the redirect
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Sign In Error",
-        description: error.message,
+        description: "Invalid email or password. Please try again.",
       });
+      console.error(error);
     }
   }
   
   async function onGoogleSignIn() {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider());
-      router.push(searchParams.get("redirect") || "/home");
+      // The useEffect will handle the redirect
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -104,8 +108,8 @@ export function SignInForm() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full">
-            Sign In
+          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Signing In..." : "Sign In"}
           </Button>
         </form>
       </Form>

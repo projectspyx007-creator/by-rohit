@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -14,10 +15,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
-import { initiateEmailSignUp } from "@/firebase/non-blocking-login";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { doc } from "firebase/firestore";
+import { useEffect } from "react";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -42,33 +44,41 @@ export function SignUpForm() {
     },
   });
 
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      if (user) {
+        router.push("/home");
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, router]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      initiateEmailSignUp(auth, values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
 
-      const unsubscribe = auth.onAuthStateChanged(user => {
-        if(user) {
-          const userRef = doc(firestore, "users", user.uid);
-          setDocumentNonBlocking(userRef, {
-            id: user.uid,
-            name: values.name,
-            email: values.email,
-            rollNumber: values.rollNumber || "",
-            role: "student",
-            createdAt: new Date().toISOString(),
-            notifications: true,
-          }, { merge: true });
-          router.push("/home");
-          unsubscribe();
-        }
-      })
-
+      if (user) {
+        const userRef = doc(firestore, "users", user.uid);
+        // Using setDoc directly here is fine as it's part of the sign-up transaction
+        await setDocumentNonBlocking(userRef, {
+          id: user.uid,
+          name: values.name,
+          email: values.email,
+          rollNumber: values.rollNumber || "",
+          role: "student",
+          createdAt: new Date().toISOString(),
+          notifications: true,
+        }, { merge: true });
+      }
+      // The useEffect will handle the redirect
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Sign Up Error",
-        description: error.message,
+        description: error.code === 'auth/email-already-in-use' ? 'This email is already registered.' : error.message,
       });
+      console.error(error);
     }
   }
 
@@ -127,10 +137,11 @@ export function SignUpForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
-          Create Account
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
         </Button>
       </form>
     </Form>
   );
 }
+
