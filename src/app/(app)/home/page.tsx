@@ -2,27 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Lightbulb, Smile, Wrench, Code, Sigma } from 'lucide-react';
-import { generateHourlyThought } from '@/ai/flows/generate-hourly-thought';
+import { Lightbulb, BrainCircuit } from 'lucide-react';
+import { generateDailyQuote } from '@/ai/flows/generate-daily-quote';
+import { generateHourlyQuestion } from '@/ai/flows/generate-hourly-question';
 
-type Thought = {
-  content: string;
-  type: 'quote' | 'joke' | 'engineering' | 'coding' | 'math';
+type Quote = {
+  quote: string;
 }
 
-const thoughtIcons = {
-    quote: <Lightbulb className="h-6 w-6 text-cream/80" />,
-    joke: <Smile className="h-6 w-6 text-cream/80" />,
-    engineering: <Wrench className="h-6 w-6 text-cream/80" />,
-    coding: <Code className="h-6 w-6 text-cream/80" />,
-    math: <Sigma className="h-6 w-6 text-cream/80" />,
+type Question = {
+  question: string;
+  category: 'engineering' | 'coding' | 'math';
 }
 
 export default function HomePage() {
   const userName = "Alex"; // This would come from user data
   const [greeting, setGreeting] = useState("");
-  const [thought, setThought] = useState<Thought | null>(null);
-  const [isLoadingThought, setIsLoadingThought] = useState(true);
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [question, setQuestion] = useState<Question | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const hour = new Date().getHours();
@@ -34,23 +32,35 @@ export default function HomePage() {
       setGreeting("Good Evening");
     }
 
-    async function fetchThought() {
+    async function fetchContent() {
       try {
-        setIsLoadingThought(true);
-        const result = await generateHourlyThought();
-        setThought(result);
+        setIsLoading(true);
+        const [quoteResult, questionResult] = await Promise.all([
+          generateDailyQuote(),
+          generateHourlyQuestion()
+        ]);
+        setQuote(quoteResult);
+        setQuestion(questionResult);
       } catch (error) {
-        console.error("Failed to fetch thought:", error);
-        setThought({ content: "The best way to predict the future is to create it.", type: 'quote'});
+        console.error("Failed to fetch content:", error);
+        setQuote({ quote: "The best way to predict the future is to create it."});
+        setQuestion({ question: "What is the powerhouse of the cell?", category: 'engineering' });
       } finally {
-        setIsLoadingThought(false);
+        setIsLoading(false);
       }
     }
 
-    fetchThought();
+    fetchContent();
     
-    // Set an interval to fetch a new thought every hour
-    const intervalId = setInterval(fetchThought, 3600000);
+    // Set an interval to fetch a new question every hour
+    const intervalId = setInterval(async () => {
+        try {
+            const questionResult = await generateHourlyQuestion();
+            setQuestion(questionResult);
+        } catch (error) {
+            console.error("Failed to fetch hourly question:", error);
+        }
+    }, 3600000);
 
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
@@ -71,26 +81,72 @@ export default function HomePage() {
         </CardContent>
       </Card>
 
-      <Card className="bg-primary text-primary-foreground p-5 rounded-2xl shadow-md border-none">
-        <CardContent className="p-0">
-          <div className="flex justify-between items-start mb-3">
-            <p className="text-sm font-bold font-headline tracking-wider uppercase">
-              Thought of the Hour
-            </p>
-            {thought && thoughtIcons[thought.type]}
-          </div>
-          {isLoadingThought ? (
-             <div className="space-y-2">
-                <div className="w-full h-4 bg-cream/20 rounded-full animate-pulse"></div>
-                <div className="w-3/4 h-4 bg-cream/20 rounded-full animate-pulse"></div>
-             </div>
-          ) : (
-            <p className="italic text-lg text-cream">
-              &ldquo;{thought?.content}&rdquo;
-            </p>
+      {isLoading ? (
+        <>
+          <Card className="bg-primary text-primary-foreground p-5 rounded-2xl shadow-md border-none">
+            <CardContent className="p-0">
+              <div className="flex justify-between items-start mb-3">
+                <p className="text-sm font-bold font-headline tracking-wider uppercase">
+                  Quote of the Day
+                </p>
+                <Lightbulb className="h-6 w-6 text-cream/80" />
+              </div>
+              <div className="space-y-2">
+                  <div className="w-full h-4 bg-cream/20 rounded-full animate-pulse"></div>
+                  <div className="w-3/4 h-4 bg-cream/20 rounded-full animate-pulse"></div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-secondary text-secondary-foreground p-5 rounded-2xl shadow-md border-none">
+            <CardContent className="p-0">
+              <div className="flex justify-between items-start mb-3">
+                <p className="text-sm font-bold font-headline tracking-wider uppercase">
+                  Question of the Hour
+                </p>
+                <BrainCircuit className="h-6 w-6 text-cream/80" />
+              </div>
+              <div className="space-y-2">
+                  <div className="w-full h-4 bg-cream/20 rounded-full animate-pulse"></div>
+                  <div className="w-3/4 h-4 bg-cream/20 rounded-full animate-pulse"></div>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <>
+          {quote && (
+            <Card className="bg-primary text-primary-foreground p-5 rounded-2xl shadow-md border-none">
+              <CardContent className="p-0">
+                <div className="flex justify-between items-start mb-3">
+                  <p className="text-sm font-bold font-headline tracking-wider uppercase">
+                    Quote of the Day
+                  </p>
+                  <Lightbulb className="h-6 w-6 text-cream/80" />
+                </div>
+                  <p className="italic text-lg text-cream">
+                    &ldquo;{quote.quote}&rdquo;
+                  </p>
+              </CardContent>
+            </Card>
           )}
-        </CardContent>
-      </Card>
+          {question && (
+             <Card className="bg-accent text-accent-foreground p-5 rounded-2xl shadow-md border-none">
+                <CardContent className="p-0">
+                    <div className="flex justify-between items-start mb-3">
+                        <p className="text-sm font-bold font-headline tracking-wider uppercase">
+                        Question of the Hour
+                        </p>
+                        <BrainCircuit className="h-6 w-6 text-cream/80" />
+                    </div>
+                    <p className="text-lg text-cream">
+                        {question.question}
+                    </p>
+                    <p className="text-xs text-cream/70 mt-2 uppercase tracking-wider">{question.category}</p>
+                </CardContent>
+            </Card>
+          )}
+        </>
+      )}
 
     </div>
   );
