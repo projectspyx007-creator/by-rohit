@@ -14,12 +14,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser, useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
+import { useTheme } from "next-themes";
 
 export default function ProfilePage() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const userRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -129,7 +131,10 @@ export default function ProfilePage() {
               <Paintbrush className="h-5 w-5 text-muted-foreground" />
               <span className="font-medium">Dark Mode</span>
             </div>
-            <Switch />
+            <Switch 
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            />
           </div>
           <Separator />
           <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer">
