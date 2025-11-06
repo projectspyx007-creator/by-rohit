@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -5,13 +8,26 @@ import { Calendar, FileText, MessageCircle } from "lucide-react";
 
 export default function HomePage() {
   const userName = "Alex"; // This would come from user data
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      setGreeting("Good Morning");
+    } else if (hour < 18) {
+      setGreeting("Good Afternoon");
+    } else {
+      setGreeting("Good Evening");
+    }
+  }, []);
+
 
   return (
     <div className="p-4 space-y-5">
       <Card className="bg-background p-5 rounded-2xl shadow-lg border-none">
         <CardContent className="p-0">
           <h2 className="text-2xl font-bold text-primary font-headline">
-            Good Morning, {userName}!
+            {greeting}, {userName}!
           </h2>
           <p className="text-sm text-muted-foreground">
             Here&apos;s your campus brew for today.

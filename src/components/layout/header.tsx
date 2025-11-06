@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Bell, Search, User } from "lucide-react";
+import { Bell, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 export function Header() {
   return (
@@ -10,10 +9,6 @@ export function Header() {
         Coffee Campus
       </Link>
       <div className="flex items-center gap-2 sm:gap-4">
-        <div className="relative hidden sm:block">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Search..." className="bg-cream pl-8 text-sm h-9 rounded-full w-32 md:w-48" />
-        </div>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           <Bell size={20} />
           <span className="sr-only">Notifications</span>
