@@ -2,12 +2,20 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { Lightbulb, Smile } from 'lucide-react';
+import { Lightbulb, Smile, Wrench, Code, Sigma } from 'lucide-react';
 import { generateHourlyThought } from '@/ai/flows/generate-hourly-thought';
 
 type Thought = {
   content: string;
-  type: 'quote' | 'joke';
+  type: 'quote' | 'joke' | 'engineering' | 'coding' | 'math';
+}
+
+const thoughtIcons = {
+    quote: <Lightbulb className="h-6 w-6 text-cream/80" />,
+    joke: <Smile className="h-6 w-6 text-cream/80" />,
+    engineering: <Wrench className="h-6 w-6 text-cream/80" />,
+    coding: <Code className="h-6 w-6 text-cream/80" />,
+    math: <Sigma className="h-6 w-6 text-cream/80" />,
 }
 
 export default function HomePage() {
@@ -69,11 +77,7 @@ export default function HomePage() {
             <p className="text-sm font-bold font-headline tracking-wider uppercase">
               Thought of the Hour
             </p>
-            {thought?.type === 'quote' ? (
-              <Lightbulb className="h-6 w-6 text-cream/80" />
-            ) : (
-              <Smile className="h-6 w-6 text-cream/80" />
-            )}
+            {thought && thoughtIcons[thought.type]}
           </div>
           {isLoadingThought ? (
              <div className="space-y-2">
