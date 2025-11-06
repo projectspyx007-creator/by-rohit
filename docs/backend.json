@@ -1,0 +1,352 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Coffee Campus application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "rollNumber": {
+          "type": "string",
+          "description": "The user's roll number (optional)."
+        },
+        "role": {
+          "type": "string",
+          "description": "The user's role within the application (e.g., student, admin, editor)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created.",
+          "format": "date-time"
+        },
+        "notifications": {
+          "type": "boolean",
+          "description": "Indicates whether the user has notifications enabled."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "role",
+        "createdAt"
+      ]
+    },
+    "Notice": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notice",
+      "type": "object",
+      "description": "Represents a campus notice or announcement.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the notice entity."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the notice."
+        },
+        "body": {
+          "type": "string",
+          "description": "The body content of the notice, formatted as HTML."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Notice)"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Keywords or categories associated with the notice.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pinned": {
+          "type": "boolean",
+          "description": "Indicates whether the notice is pinned to the top of the list."
+        },
+        "attachments": {
+          "type": "array",
+          "description": "URLs of files attached to the notice.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the notice was created.",
+          "format": "date-time"
+        },
+        "expiryDate": {
+          "type": "string",
+          "description": "Date when the notice will expire (optional).",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "body",
+        "authorId",
+        "createdAt"
+      ]
+    },
+    "Timetable": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Timetable",
+      "type": "object",
+      "description": "Represents a user's weekly timetable.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the timetable entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Timetable)"
+        },
+        "entries": {
+          "type": "array",
+          "description": "Array of timetable entries.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "entries"
+      ]
+    },
+    "TimetableEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "TimetableEntry",
+      "type": "object",
+      "description": "Represents a single entry in a user's timetable.",
+      "properties": {
+        "subject": {
+          "type": "string",
+          "description": "The subject or course name."
+        },
+        "room": {
+          "type": "string",
+          "description": "The room where the class is held."
+        },
+        "teacher": {
+          "type": "string",
+          "description": "The name of the teacher or instructor."
+        },
+        "day": {
+          "type": "string",
+          "description": "The day of the week for the class (e.g., Monday, Tuesday)."
+        },
+        "start": {
+          "type": "string",
+          "description": "The start time of the class."
+        },
+        "end": {
+          "type": "string",
+          "description": "The end time of the class."
+        },
+        "color": {
+          "type": "string",
+          "description": "Color associated with the entry for display purposes."
+        }
+      },
+      "required": [
+        "subject",
+        "room",
+        "teacher",
+        "day",
+        "start",
+        "end"
+      ]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a single message in a chat conversation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the chat message."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N ChatMessage)"
+        },
+        "role": {
+          "type": "string",
+          "description": "The role of the message sender (e.g., user, assistant)."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp indicating when the message was sent.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "role",
+        "text",
+        "timestamp"
+      ]
+    },
+    "Notification": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Notification",
+      "type": "object",
+      "description": "Represents a notification for a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the notification entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Notification)"
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of notification (e.g., new_notice)."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the notification."
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Indicates whether the notification has been read."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the notification was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "type",
+        "title",
+        "read",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "notices/{noticeId}",
+        "definition": {
+          "entityName": "Notice",
+          "schema": {
+            "$ref": "#/backend/entities/Notice"
+          },
+          "description": "Stores campus notices and announcements. Includes denormalized 'authorId' for authorization independence.",
+          "params": [
+            {
+              "name": "noticeId",
+              "description": "The unique identifier of the notice."
+            }
+          ]
+        }
+      },
+      {
+        "path": "timetables/{userId}",
+        "definition": {
+          "entityName": "Timetable",
+          "schema": {
+            "$ref": "#/backend/entities/Timetable"
+          },
+          "description": "Stores user's weekly timetable. Path-based ownership: only the user can access their own timetable.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "chat_conversations/{userId}",
+        "definition": {
+          "entityName": "ChatMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ChatMessage"
+          },
+          "description": "Stores chat messages for each user. Path-based ownership: only the user can access their own chat conversations.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "users/{userId}/notifications/{notificationId}",
+        "definition": {
+          "entityName": "Notification",
+          "schema": {
+            "$ref": "#/backend/entities/Notification"
+          },
+          "description": "Stores notifications for each user. Path-based ownership: only the user can access their own notifications.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "notificationId",
+              "description": "The unique identifier of the notification."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore data structure is designed to support the 'Coffee Campus' application, focusing on user authentication, real-time notices, personalized timetables, an AI-powered Coffee Coach, and profile management. The structure adheres to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters).\n\n**Authorization Independence (Denormalization):**\n\n*   **Notices:** The `authorId` is stored within each notice, allowing rules to verify ownership without needing to `get()` the user document. This is crucial for atomic operations and avoids hierarchical authorization dependencies.\n*   **Timetables, Chat Conversations, and Notifications:** These are all subcollections of `/users/{userId}`, ensuring that only the authenticated user has access. This path-based ownership eliminates the need for `get()` calls to determine authorization.\n\n**Structural Segregation (Homogeneous Security Posture):**\n\n*   Each collection (e.g., `/notices`, `/timetables`, `/chat_conversations`) contains documents with similar security requirements. This simplifies the rules and avoids mixing data with different access needs within the same collection.\n\n**Access Modeling (Standardization and Consistency):**\n\n*   **Private Data:** Timetables, Chat Conversations, and Notifications are located under `/users/{userId}`, implementing path-based ownership for user-specific data.\n*   **Global Roles (DBAC):** While the provided rules use custom claims (`request.auth.token.role`), the recommendation is to store roles in the database (e.g., a dedicated `/roles_admin/{uid}` collection) and check for existence, following the Existence over Content principle.\n\n**QAPs (Rules are not Filters):**\n\n*   The segregation of data into collections with homogeneous security postures (e.g., all documents in `/notices` have the same read access rules) ensures that list operations can be performed securely without the rules acting as filters.  For example, any user can list all `/notices` because the read rule allows it. Admin/Editor access is controlled for `create`, `update`, and `delete` based on role (which, ideally, should be stored in the database as suggested above for true DBAC)."
+  }
+}
