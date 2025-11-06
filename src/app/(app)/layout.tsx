@@ -1,5 +1,6 @@
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { NotificationScheduler } from "@/components/notifications/notification-scheduler";
 
 export default function AppLayout({
   children,
@@ -13,6 +14,7 @@ export default function AppLayout({
         {children}
       </main>
       <BottomNav />
+      <NotificationScheduler />
     </div>
   );
 }
