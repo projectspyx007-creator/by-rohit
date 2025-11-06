@@ -62,7 +62,7 @@ function TimetableForm({
       day: 'Monday',
       start: '',
       end: '',
-      color: `bg-blue-200`,
+      color: `#${Math.floor(Math.random()*16777215).toString(16)}`,
     },
   });
 
@@ -183,7 +183,7 @@ const TimetableCard = ({
   onEdit: () => void;
   onDelete: () => void;
 }) => (
-  <Card className={`rounded-xl shadow-sm border-l-4 ${entry.color ? entry.color.replace('bg-', 'border-') : 'border-primary'}`} style={{ borderLeftColor: entry.color?.startsWith('#') ? entry.color : undefined }}>
+    <Card className="rounded-xl shadow-sm" style={{ borderLeft: `4px solid ${entry.color || '#6B4226'}`}}>
     <CardContent className="p-3">
       <div className="flex justify-between items-start">
         <div>
@@ -211,7 +211,10 @@ const TimetableCard = ({
 
 export default function TimetablePage() {
   const firestore = useFirestore();
-  const timetableRef = useMemoFirebase(() => doc(firestore, 'timetables', 'guest-timetable'), [firestore]);
+  const timetableRef = useMemoFirebase(() => {
+      if (!firestore) return null;
+      return doc(firestore, 'timetables', 'guest-timetable');
+  }, [firestore]);
   const { data: timetable, isLoading } = useDoc<TimetableDoc>(timetableRef);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -228,12 +231,13 @@ export default function TimetablePage() {
   };
 
   const handleDelete = (entryToDelete: TimetableEntry) => {
+    if (!timetableRef) return;
     const updatedEntries = timetable?.entries.filter(entry => entry.id !== entryToDelete.id) || [];
     setDocumentNonBlocking(timetableRef, { entries: updatedEntries }, { merge: true });
   }
 
   const entriesByDay = daysOfWeek.reduce((acc, day) => {
-    acc[day] = timetable?.entries.filter((e) => e.day === day) || [];
+    acc[day] = timetable?.entries?.filter((e) => e.day === day).sort((a, b) => a.start.localeCompare(b.start)) || [];
     return acc;
   }, {} as Record<string, TimetableEntry[]>);
 
@@ -241,7 +245,10 @@ export default function TimetablePage() {
     <div className="p-4 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary font-headline">My Timetable</h1>
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <Dialog open={isFormOpen} onOpenChange={(isOpen) => {
+            setIsFormOpen(isOpen);
+            if (!isOpen) setEditingEntry(undefined);
+        }}>
             <DialogTrigger asChild>
                 <Button onClick={handleAdd}>Add Entry</Button>
             </DialogTrigger>
@@ -249,10 +256,10 @@ export default function TimetablePage() {
                 <DialogHeader>
                     <DialogTitle>{editingEntry ? 'Edit Entry' : 'Add New Entry'}</DialogTitle>
                 </DialogHeader>
-                {timetable && (
+                {timetableRef && (
                     <TimetableForm 
                         setDialogOpen={setIsFormOpen}
-                        timetable={timetable}
+                        timetable={timetable || { entries: [] }}
                         timetableRef={timetableRef}
                         entry={editingEntry}
                     />
@@ -265,11 +272,11 @@ export default function TimetablePage() {
       
       <div className="space-y-4">
         {daysOfWeek.map((day) => (
+          entriesByDay[day] && entriesByDay[day].length > 0 && (
           <div key={day}>
             <h2 className="font-bold text-lg text-primary mb-2">{day}</h2>
             <div className="space-y-2">
-              {entriesByDay[day].length > 0 ? (
-                entriesByDay[day].map((entry) => (
+              {entriesByDay[day].map((entry) => (
                   <TimetableCard 
                     key={entry.id} 
                     entry={entry} 
@@ -277,13 +284,20 @@ export default function TimetablePage() {
                     onDelete={() => handleDelete(entry)}
                     />
                 ))
-              ) : (
-                <p className="text-sm text-muted-foreground italic">No classes today. Enjoy your day!</p>
-              )}
+              }
             </div>
           </div>
+          )
         ))}
       </div>
+       {(timetable?.entries?.length || 0) === 0 && !isLoading && (
+        <div className="text-center py-10">
+          <p className="text-muted-foreground">Your timetable is empty.</p>
+          <p className="text-muted-foreground">Click "Add Entry" to get started.</p>
+        </div>
+      )}
     </div>
   );
 }
+
+    
