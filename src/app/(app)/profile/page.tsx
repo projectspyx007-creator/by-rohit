@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useUser, useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProfilePage() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
@@ -143,14 +144,4 @@ export default function ProfilePage() {
       
     </div>
   );
-}
-
-// Minimal Badge component for this page as it's not in the base shadcn export
-function Badge({ variant, ...props }: { variant: 'outline' | 'secondary' } & React.HTMLAttributes<HTMLDivElement>) {
-    const baseClasses = "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors";
-    const variants = {
-        outline: "text-foreground",
-        secondary: "bg-secondary text-secondary-foreground"
-    };
-    return <div className={`${baseClasses} ${variants[variant]}`} {...props} />;
 }
