@@ -27,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore, useCollection, addDocumentNonBlocking, useMemoFirebase, useUser } from '@/firebase';
+import { useFirestore, useCollection, addDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
@@ -39,7 +39,6 @@ const noticeSchema = z.object({
 
 function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => void }) {
   const firestore = useFirestore();
-  const { user } = useUser();
   const noticesCollection = useMemoFirebase(() => collection(firestore, 'notices'), [firestore]);
 
   const form = useForm<z.infer<typeof noticeSchema>>({
@@ -51,13 +50,12 @@ function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => vo
   });
 
   const onSubmit = async (values: z.infer<typeof noticeSchema>) => {
-    if (!noticesCollection || !user) return;
+    if (!noticesCollection) return;
     
     addDocumentNonBlocking(noticesCollection, {
       title: values.title,
       body: values.content,
-      authorId: user.uid,
-      author: user.displayName || 'Anonymous',
+      author: 'Admin', // Hardcoded as auth is removed
       createdAt: new Date().toISOString(),
       pinned: false,
       tags: [],

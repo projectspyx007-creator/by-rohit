@@ -16,10 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
 import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { doc } from "firebase/firestore";
-import { useEffect } from "react";
 import { Separator } from "../ui/separator";
 import { Icons } from "../icons";
 
@@ -34,7 +33,6 @@ export function SignUpForm() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -46,15 +44,6 @@ export function SignUpForm() {
       rollNumber: "",
     },
   });
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(user => {
-      if (user) {
-        router.push(searchParams.get("redirect") || "/home");
-      }
-    });
-    return () => unsubscribe();
-  }, [auth, router, searchParams]);
 
   const handleUserCreation = async (user: any, name?: string, email?: string) => {
     const userRef = doc(firestore, "users", user.uid);
@@ -68,6 +57,7 @@ export function SignUpForm() {
       createdAt: new Date().toISOString(),
       notifications: true,
     }, { merge: true });
+    router.push("/home");
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -97,6 +87,8 @@ export function SignUpForm() {
         const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
         if(isNewUser) {
            await handleUserCreation(user);
+        } else {
+            router.push("/home");
         }
       }
     } catch (error: any) {
@@ -187,5 +179,3 @@ export function SignUpForm() {
     </div>
   );
 }
-
-    

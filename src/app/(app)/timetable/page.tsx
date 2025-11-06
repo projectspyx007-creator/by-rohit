@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase, useUser } from '@/firebase';
+import { useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
@@ -211,12 +211,13 @@ const TimetableCard = ({
 
 export default function TimetablePage() {
   const firestore = useFirestore();
-  const { user } = useUser();
+  // Using a hardcoded guest ID for now to bypass authentication for development
+  const guestUserId = "guest-timetable";
 
   const timetableRef = useMemoFirebase(() => {
-      if (!firestore || !user) return null;
-      return doc(firestore, 'timetables', user.uid);
-  }, [firestore, user]);
+      if (!firestore) return null;
+      return doc(firestore, 'timetables', guestUserId);
+  }, [firestore]);
 
   const { data: timetable, isLoading } = useDoc<TimetableDoc>(timetableRef);
 

@@ -11,22 +11,23 @@ import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Bell, Paintbrush, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useUser, useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
+import { useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "next-themes";
 
 export default function ProfilePage() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
-  const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  // Using a hardcoded guest ID for now to bypass authentication
+  const guestUserId = "guest-timetable";
 
   const userRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'users', user.uid);
-  }, [firestore, user]);
+    if (!firestore) return null;
+    return doc(firestore, 'users', guestUserId);
+  }, [firestore]);
   
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userRef);
   const [notificationPermission, setNotificationPermission] = useState('default');

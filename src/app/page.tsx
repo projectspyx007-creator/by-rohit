@@ -17,7 +17,7 @@ export default function LandingPage() {
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full max-w-xs">
           <Button asChild className="w-full" size="lg">
-            <Link href="/signin">Get Started</Link>
+            <Link href="/home">Get Started</Link>
           </Button>
         </div>
       </div>
