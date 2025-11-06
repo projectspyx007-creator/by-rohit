@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "next/navigation";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { doc } from "firebase/firestore";
 import { useEffect } from "react";
+import { Separator } from "../ui/separator";
+import { Icons } from "../icons";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -32,6 +34,7 @@ export function SignUpForm() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -47,11 +50,25 @@ export function SignUpForm() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
-        router.push("/home");
+        router.push(searchParams.get("redirect") || "/home");
       }
     });
     return () => unsubscribe();
-  }, [auth, router]);
+  }, [auth, router, searchParams]);
+
+  const handleUserCreation = async (user: any, name?: string, email?: string) => {
+    const userRef = doc(firestore, "users", user.uid);
+    // Using setDoc directly here is fine as it's part of the sign-up transaction
+    await setDocumentNonBlocking(userRef, {
+      id: user.uid,
+      name: name || user.displayName || "New User",
+      email: email || user.email,
+      rollNumber: "", // Google sign in doesn't provide this
+      role: "student",
+      createdAt: new Date().toISOString(),
+      notifications: true,
+    }, { merge: true });
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -59,19 +76,8 @@ export function SignUpForm() {
       const user = userCredential.user;
 
       if (user) {
-        const userRef = doc(firestore, "users", user.uid);
-        // Using setDoc directly here is fine as it's part of the sign-up transaction
-        await setDocumentNonBlocking(userRef, {
-          id: user.uid,
-          name: values.name,
-          email: values.email,
-          rollNumber: values.rollNumber || "",
-          role: "student",
-          createdAt: new Date().toISOString(),
-          notifications: true,
-        }, { merge: true });
+        await handleUserCreation(user, values.name, values.email);
       }
-      // The useEffect will handle the redirect
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -82,66 +88,104 @@ export function SignUpForm() {
     }
   }
 
+  async function onGoogleSignIn() {
+    try {
+      const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
+      const user = userCredential.user;
+       if (user) {
+        // Check if it's a new user
+        const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
+        if(isNewUser) {
+           await handleUserCreation(user);
+        }
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Google Sign In Error",
+        description: error.message,
+      });
+    }
+  }
+
+
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Alex Doe" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="name@college.edu" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="rollNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Roll Number (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="CS-24-001" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
-        </Button>
-      </form>
-    </Form>
+    <div className="grid gap-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Alex Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="name@college.edu" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="••••••••" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="rollNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Roll Number (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="CS-24-001" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
+          </Button>
+        </form>
+      </Form>
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <Separator />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-card px-2 text-muted-foreground">
+            Or continue with
+          </span>
+        </div>
+      </div>
+      <Button variant="outline" type="button" onClick={onGoogleSignIn}>
+        <Icons.Google className="mr-2 h-4 w-4" />
+        Google
+      </Button>
+    </div>
   );
 }
 
+    
