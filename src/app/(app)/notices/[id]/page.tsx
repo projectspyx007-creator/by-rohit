@@ -72,7 +72,7 @@ export default function NoticeDetailPage() {
             )}
           </div>
           <CardDescription>
-            By {notice.author} on {format(new Date(notice.date || notice.createdAt), 'PPP')}
+            By {notice.author} on {format(new Date(notice.createdAt), 'PPP')}
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -59,7 +59,6 @@ function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => vo
       authorId: user.uid,
       author: user.displayName || 'Anonymous',
       createdAt: new Date().toISOString(),
-      date: new Date().toISOString(),
       pinned: false,
       tags: [],
       attachments: [],
@@ -146,7 +145,7 @@ export default function NoticesPage() {
               </Badge>
             </div>
             <CardDescription>
-              By {notice.author} on {format(new Date(notice.date), 'PPP')}
+              By {notice.author} on {format(new Date(notice.createdAt), 'PPP')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -167,7 +166,7 @@ export default function NoticesPage() {
                 </CardTitle>
               </Link>
             <CardDescription>
-              By {notice.author} on {format(new Date(notice.date), 'PPP')}
+              By {notice.author} on {format(new Date(notice.createdAt), 'PPP')}
             </CardDescription>
           </CardHeader>
           <CardContent>
