@@ -15,6 +15,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Icons } from "@/components/icons";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/firebase";
+import { initiateEmailSignIn } from "@/firebase/non-blocking-login";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -22,6 +28,11 @@ const formSchema = z.object({
 });
 
 export function SignInForm() {
+  const auth = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,14 +41,30 @@ export function SignInForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Implement Firebase email/password sign in
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      initiateEmailSignIn(auth, values.email, values.password);
+      router.push(searchParams.get("redirect") || "/home");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign In Error",
+        description: error.message,
+      });
+    }
   }
   
-  function onGoogleSignIn() {
-    // TODO: Implement Firebase Google sign in
-    console.log("Signing in with Google");
+  async function onGoogleSignIn() {
+    try {
+      await signInWithPopup(auth, new GoogleAuthProvider());
+      router.push(searchParams.get("redirect") || "/home");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Google Sign In Error",
+        description: error.message,
+      });
+    }
   }
 
   return (

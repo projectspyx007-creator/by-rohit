@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -7,21 +9,34 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, LogOut, Bell, Paintbrush, ShieldCheck } from "lucide-react";
+import { useAuth, useUser } from "@/firebase";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
+  const auth = useAuth();
+  const { user } = useUser();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push("/signin");
+  };
 
   return (
     <div className="p-4 space-y-6">
       <div className="flex flex-col items-center space-y-2">
         <Avatar className="h-24 w-24 border-4 border-background shadow-md">
-          {userAvatar && (
+          {user?.photoURL ? (
+            <AvatarImage src={user.photoURL} alt="User avatar" />
+          ) : userAvatar && (
             <AvatarImage src={userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />
           )}
-          <AvatarFallback>AD</AvatarFallback>
+          <AvatarFallback>{user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U'}</AvatarFallback>
         </Avatar>
-        <h1 className="text-2xl font-bold text-primary font-headline">Alex Doe</h1>
-        <p className="text-sm text-muted-foreground">alex.doe@college.edu</p>
+        <h1 className="text-2xl font-bold text-primary font-headline">{user?.displayName || "User"}</h1>
+        <p className="text-sm text-muted-foreground">{user?.email}</p>
         <div className="flex gap-2">
             <Badge variant="outline">Roll: CS-24-001</Badge>
             <Badge variant="secondary">Role: Student</Badge>
@@ -58,11 +73,9 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
       
-      <Button asChild variant="destructive" className="w-full">
-        <Link href="/signin">
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-        </Link>
+      <Button variant="destructive" className="w-full" onClick={handleLogout}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
       </Button>
     </div>
   );

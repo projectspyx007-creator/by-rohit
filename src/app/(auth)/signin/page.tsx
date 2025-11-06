@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Suspense } from "react";
 
 export default function SignInPage() {
   return (
@@ -16,7 +17,9 @@ export default function SignInPage() {
         <CardDescription>Sign in to continue to your campus brew.</CardDescription>
       </CardHeader>
       <CardContent>
-        <SignInForm />
+        <Suspense>
+          <SignInForm />
+        </Suspense>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="underline text-accent-foreground font-medium hover:text-primary">

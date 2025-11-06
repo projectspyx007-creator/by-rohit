@@ -13,6 +13,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
+import { initiateEmailSignUp } from "@/firebase/non-blocking-login";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import { doc } from "firebase/firestore";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -22,6 +27,11 @@ const formSchema = z.object({
 });
 
 export function SignUpForm() {
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -32,9 +42,33 @@ export function SignUpForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // TODO: Implement Firebase email/password sign up
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      initiateEmailSignUp(auth, values.email, values.password);
+
+      auth.onAuthStateChanged(user => {
+        if(user) {
+          const userRef = doc(firestore, "users", user.uid);
+          setDocumentNonBlocking(userRef, {
+            id: user.uid,
+            name: values.name,
+            email: values.email,
+            rollNumber: values.rollNumber || "",
+            role: "student",
+            createdAt: new Date().toISOString(),
+            notifications: true,
+          }, { merge: true });
+          router.push("/home");
+        }
+      })
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Sign Up Error",
+        description: error.message,
+      });
+    }
   }
 
   return (
