@@ -44,7 +44,14 @@ export function SignInForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       initiateEmailSignIn(auth, values.email, values.password);
-      router.push(searchParams.get("redirect") || "/home");
+      
+      const unsubscribe = auth.onAuthStateChanged(user => {
+        if(user) {
+          router.push(searchParams.get("redirect") || "/home");
+          unsubscribe();
+        }
+      });
+
     } catch (error: any) {
       toast({
         variant: "destructive",

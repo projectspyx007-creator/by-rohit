@@ -46,7 +46,7 @@ export function SignUpForm() {
     try {
       initiateEmailSignUp(auth, values.email, values.password);
 
-      auth.onAuthStateChanged(user => {
+      const unsubscribe = auth.onAuthStateChanged(user => {
         if(user) {
           const userRef = doc(firestore, "users", user.uid);
           setDocumentNonBlocking(userRef, {
@@ -59,6 +59,7 @@ export function SignUpForm() {
             notifications: true,
           }, { merge: true });
           router.push("/home");
+          unsubscribe();
         }
       })
 
