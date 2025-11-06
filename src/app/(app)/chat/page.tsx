@@ -1,17 +1,18 @@
 'use client';
 
 import { ChatView } from "@/components/chat/chat-view";
-import { useFirestore, useDoc, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useDoc, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection, query, orderBy } from 'firebase/firestore';
 import { useEffect, useState } from "react";
 
 export default function ChatPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
 
   const timetableRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'timetables', 'guest-timetable');
-  }, [firestore]);
+    if (!firestore || !user) return null;
+    return doc(firestore, 'timetables', user.uid);
+  }, [firestore, user]);
   const { data: timetableDoc } = useDoc(timetableRef);
 
   const noticesQuery = useMemoFirebase(() => {

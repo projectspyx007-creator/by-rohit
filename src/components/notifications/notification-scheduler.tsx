@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,30 +19,44 @@ type TimetableDoc = {
   entries: TimetableEntry[];
 };
 
+type UserProfile = {
+  notifications?: boolean;
+}
+
 export function NotificationScheduler() {
+  const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState('default');
+
+  // Effect to update notification permission state from the browser
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermission(Notification.permission);
+      const interval = setInterval(() => {
+        if (Notification.permission !== permission) {
+          setPermission(Notification.permission);
+        }
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [permission]);
+
+  const userRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile } = useDoc<UserProfile>(userRef);
 
   const timetableRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    // Assuming a guest user for now as per previous changes
-    return doc(firestore, 'timetables', 'guest-timetable');
-  }, [firestore]);
+    if (!firestore || !user) return null;
+    return doc(firestore, 'timetables', user.uid);
+  }, [firestore, user]);
   const { data: timetable } = useDoc<TimetableDoc>(timetableRef);
 
   useEffect(() => {
-    // Function to check and update permission status
-    const checkPermission = () => {
-      setPermission(Notification.permission);
-    };
-    // Check permission status periodically in case it changes in browser settings
-    const interval = setInterval(checkPermission, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (permission !== 'granted' || !timetable?.entries) {
+    // Exit if permissions are not granted, or if necessary data is missing
+    if (permission !== 'granted' || !timetable?.entries || !userProfile?.notifications) {
       return;
     }
 
@@ -59,17 +73,20 @@ export function NotificationScheduler() {
         const classTime = new Date();
         classTime.setHours(hours, minutes, 0, 0);
 
+        // Schedule notification 15 minutes before class
         const notificationTime = new Date(classTime.getTime() - 15 * 60 * 1000);
+        
+        // Generate a unique ID for this specific notification instance
+        const notificationId = `class-${entry.id}-${classTime.getFullYear()}-${classTime.getMonth()}-${classTime.getDate()}`;
 
-        // Check if the notification time is in the future and hasn't been scheduled
-        const notificationId = `class-${entry.id}-${notificationTime.getTime()}`;
+        // Check if the notification time is in the future and hasn't already been scheduled
         if (notificationTime > now && !scheduledNotifications.has(notificationId)) {
           const delay = notificationTime.getTime() - now.getTime();
 
           setTimeout(() => {
             new Notification(`Class Reminder: ${entry.subject}`, {
               body: `Your class in ${entry.room} starts in 15 minutes.`,
-              icon: '/coffee-icon.png', // Optional: you'd need to add an icon to your public folder
+              icon: '/coffee-icon.png', // Optional: add an icon to your public folder
             });
           }, delay);
 
@@ -78,7 +95,6 @@ export function NotificationScheduler() {
       });
     };
     
-    // Schedule notifications for today
     scheduleNotificationsForToday();
     
     // Check for new classes to schedule every minute
@@ -86,7 +102,7 @@ export function NotificationScheduler() {
     
     return () => clearInterval(interval);
 
-  }, [timetable, permission, toast]);
+  }, [timetable, permission, userProfile, toast]);
 
   return null; // This component doesn't render anything
 }

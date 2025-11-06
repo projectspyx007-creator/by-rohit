@@ -11,22 +11,36 @@ import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Bell, Paintbrush, ShieldCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useUser, useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 export default function ProfilePage() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
-  const userName = "Guest User";
-  const userEmail = "guest@example.com";
+  const { user } = useUser();
+  const firestore = useFirestore();
   const { toast } = useToast();
 
+  const userRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc(userRef);
   const [notificationPermission, setNotificationPermission] = useState('default');
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
     if ('Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
-  }, []);
+    if (userProfile) {
+      setNotificationsEnabled(userProfile.notifications && Notification.permission === 'granted');
+    }
+  }, [userProfile]);
 
   const handleNotificationToggle = async (checked: boolean) => {
+    if (!userRef) return;
+
     if (!('Notification' in window)) {
       toast({
         variant: "destructive",
@@ -38,37 +52,44 @@ export default function ProfilePage() {
 
     if (checked) {
       if (Notification.permission === 'granted') {
-        setNotificationPermission('granted');
+        setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
+        setNotificationsEnabled(true);
       } else if (Notification.permission !== 'denied') {
         const permission = await Notification.requestPermission();
         setNotificationPermission(permission);
         if (permission === 'granted') {
+          setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
+          setNotificationsEnabled(true);
           toast({
             title: "Notifications Enabled",
             description: "You will now receive reminders for your classes.",
           });
         } else {
-           toast({
+          toast({
             variant: "destructive",
             title: "Notifications Blocked",
             description: "Please enable notifications in your browser settings.",
           });
+          setNotificationsEnabled(false);
         }
       } else {
-        // Permission is denied
         toast({
-            variant: "destructive",
-            title: "Notifications are Blocked",
-            description: "You need to manually enable notifications for this site in your browser settings.",
+          variant: "destructive",
+          title: "Notifications are Blocked",
+          description: "You need to manually enable notifications for this site in your browser settings.",
         });
+        setNotificationsEnabled(false);
       }
     } else {
-        // Toggling off doesn't require browser permissions, just reflects an app setting.
-        // For this demo, we'll just update the visual state.
-        // In a real app, you would save this preference to the user's profile.
+      setDocumentNonBlocking(userRef, { notifications: false }, { merge: true });
+      setNotificationsEnabled(false);
     }
   };
   
+  const userName = userProfile?.name || "Guest User";
+  const userEmail = userProfile?.email || "guest@example.com";
+  const userRoll = userProfile?.rollNumber || "N/A";
+
   return (
     <div className="p-4 space-y-6">
       <div className="flex flex-col items-center space-y-2">
@@ -81,8 +102,8 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-bold text-primary font-headline">{userName}</h1>
         <p className="text-sm text-muted-foreground">{userEmail}</p>
         <div className="flex gap-2">
-            <Badge variant="outline">Roll: CS-24-001</Badge>
-            <Badge variant="secondary">Role: Student</Badge>
+            <Badge variant="outline">Roll: {userRoll}</Badge>
+            <Badge variant="secondary">Role: {userProfile?.role || 'Student'}</Badge>
         </div>
       </div>
 
@@ -97,9 +118,9 @@ export default function ProfilePage() {
               <span className="font-medium">Notifications</span>
             </div>
             <Switch 
-              checked={notificationPermission === 'granted'}
+              checked={notificationsEnabled}
               onCheckedChange={handleNotificationToggle}
-              disabled={notificationPermission === 'denied'}
+              disabled={notificationPermission === 'denied' || isProfileLoading}
             />
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">

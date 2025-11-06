@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase } from '@/firebase';
+import { useFirestore, useDoc, setDocumentNonBlocking, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
@@ -211,10 +211,13 @@ const TimetableCard = ({
 
 export default function TimetablePage() {
   const firestore = useFirestore();
+  const { user } = useUser();
+
   const timetableRef = useMemoFirebase(() => {
-      if (!firestore) return null;
-      return doc(firestore, 'timetables', 'guest-timetable');
-  }, [firestore]);
+      if (!firestore || !user) return null;
+      return doc(firestore, 'timetables', user.uid);
+  }, [firestore, user]);
+
   const { data: timetable, isLoading } = useDoc<TimetableDoc>(timetableRef);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -231,8 +234,8 @@ export default function TimetablePage() {
   };
 
   const handleDelete = (entryToDelete: TimetableEntry) => {
-    if (!timetableRef) return;
-    const updatedEntries = timetable?.entries.filter(entry => entry.id !== entryToDelete.id) || [];
+    if (!timetableRef || !timetable) return;
+    const updatedEntries = timetable.entries.filter(entry => entry.id !== entryToDelete.id);
     setDocumentNonBlocking(timetableRef, { entries: updatedEntries }, { merge: true });
   }
 
@@ -299,5 +302,3 @@ export default function TimetablePage() {
     </div>
   );
 }
-
-    
