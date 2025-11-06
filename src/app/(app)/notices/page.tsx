@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { mockNotices } from '@/lib/data';
 import {
   Card,
   CardContent,
@@ -25,39 +24,105 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useFirestore, useCollection, addDocumentNonBlocking, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
-function NewNoticeForm() {
-  // In a real app, this would handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('New notice submitted! (This is a placeholder)');
+const noticeSchema = z.object({
+  title: z.string().min(1, { message: 'Title is required.' }),
+  content: z.string().min(1, { message: 'Content is required.' }),
+});
+
+
+function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => void }) {
+  const firestore = useFirestore();
+  const noticesCollection = useMemoFirebase(() => collection(firestore, 'notices'), [firestore]);
+
+  const form = useForm<z.infer<typeof noticeSchema>>({
+    resolver: zodResolver(noticeSchema),
+    defaultValues: {
+      title: '',
+      content: '',
+    },
+  });
+
+  const onSubmit = async (values: z.infer<typeof noticeSchema>) => {
+    if (!noticesCollection) return;
+    
+    addDocumentNonBlocking(noticesCollection, {
+      title: values.title,
+      body: values.content,
+      authorId: 'guest', // Since auth is removed
+      author: 'Guest', // Since auth is removed
+      createdAt: new Date().toISOString(),
+      date: new Date().toISOString(),
+      pinned: false,
+      tags: [],
+      attachments: [],
+    });
+    
+    form.reset();
+    setDialogOpen(false);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input id="title" placeholder="Enter notice title" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="content">Content</Label>
-        <Textarea id="content" placeholder="Enter notice content" />
-      </div>
-      <Button type="submit" className="w-full">
-        Add Notice
-      </Button>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem>
+              <Label htmlFor="title">Title</Label>
+              <FormControl>
+                <Input id="title" placeholder="Enter notice title" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="content"
+          render={({ field }) => (
+            <FormItem>
+              <Label htmlFor="content">Content</Label>
+              <FormControl>
+                <Textarea id="content" placeholder="Enter notice content" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? 'Adding...' : 'Add Notice'}
+        </Button>
+      </form>
+    </Form>
   );
 }
 
 export default function NoticesPage() {
-  const pinnedNotices = mockNotices.filter((n) => n.pinned);
-  const otherNotices = mockNotices.filter((n) => !n.pinned);
+  const firestore = useFirestore();
+  const noticesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'notices'), orderBy('createdAt', 'desc'));
+  }, [firestore]);
+
+  const { data: notices, isLoading } = useCollection(noticesQuery);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const pinnedNotices = notices?.filter((n) => n.pinned) || [];
+  const otherNotices = notices?.filter((n) => !n.pinned) || [];
 
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold text-primary font-headline">Notices</h1>
+      
+      {isLoading && <p>Loading notices...</p>}
 
       {pinnedNotices.map((notice) => (
         <Card
@@ -86,7 +151,7 @@ export default function NoticesPage() {
           <CardContent>
             <div
               className="prose prose-sm text-foreground"
-              dangerouslySetInnerHTML={{ __html: notice.content }}
+              dangerouslySetInnerHTML={{ __html: notice.body }}
             />
           </CardContent>
         </Card>
@@ -106,7 +171,7 @@ export default function NoticesPage() {
           </CardHeader>
           <CardContent>
             <div className="prose prose-sm text-foreground max-h-20 overflow-hidden relative">
-              <div dangerouslySetInnerHTML={{ __html: notice.content }} />
+              <div dangerouslySetInnerHTML={{ __html: notice.body }} />
               <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream to-transparent" />
             </div>
           </CardContent>
@@ -129,7 +194,7 @@ export default function NoticesPage() {
           <DialogHeader>
             <DialogTitle>Create a New Notice</DialogTitle>
           </DialogHeader>
-          <NewNoticeForm />
+          <NewNoticeForm setDialogOpen={setIsDialogOpen} />
         </DialogContent>
       </Dialog>
     </div>

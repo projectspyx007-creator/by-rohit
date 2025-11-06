@@ -1,7 +1,6 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { mockNotices } from '@/lib/data';
 import {
   Card,
   CardContent,
@@ -15,12 +14,25 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc } from 'firebase/firestore';
 
 export default function NoticeDetailPage() {
   const params = useParams();
   const noticeId = params.id as string;
-  const notice = mockNotices.find((n) => n.id === noticeId);
+  const firestore = useFirestore();
+  
+  const noticeRef = useMemoFirebase(() => {
+    if (!firestore || !noticeId) return null;
+    return doc(firestore, 'notices', noticeId);
+  }, [firestore, noticeId]);
 
+  const { data: notice, isLoading } = useDoc(noticeRef);
+
+  if (isLoading) {
+    return <div className="p-4 text-center">Loading...</div>;
+  }
+  
   if (!notice) {
     return (
       <div className="p-4 text-center">
@@ -60,13 +72,13 @@ export default function NoticeDetailPage() {
             )}
           </div>
           <CardDescription>
-            By {notice.author} on {format(new Date(notice.date), 'PPP')}
+            By {notice.author} on {format(new Date(notice.date || notice.createdAt), 'PPP')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div
             className="prose text-foreground"
-            dangerouslySetInnerHTML={{ __html: notice.content }}
+            dangerouslySetInnerHTML={{ __html: notice.body }}
           />
         </CardContent>
       </Card>
