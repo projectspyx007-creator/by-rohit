@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User, updateProfile } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc } from "firebase/firestore";
@@ -26,7 +26,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  rollNumber: z.string().optional(),
+  rollNumber: z.string().regex(/^[a-zA-Z]{2}\d{2}[bB]\d{4}$/, { message: "Invalid roll number format (e.g., cs24b1001)." }),
 });
 
 export function SignUpForm() {
@@ -47,12 +47,16 @@ export function SignUpForm() {
 
   const handleUserCreation = async (user: User, details: { name: string; email: string; rollNumber?: string; }) => {
     if (!firestore) return;
+
+    // Update Firebase Auth profile
+    await updateProfile(user, { displayName: details.name });
+
     const userRef = doc(firestore, "users", user.uid);
     // Using setDoc directly here is fine as it's part of the sign-up transaction
     await setDocumentNonBlocking(userRef, {
       id: user.uid,
-      name: details.name || user.displayName || "New User",
-      email: details.email || user.email,
+      name: details.name,
+      email: details.email,
       rollNumber: details.rollNumber || "", 
       role: "student",
       createdAt: new Date().toISOString(),
@@ -163,9 +167,9 @@ export function SignUpForm() {
             name="rollNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Roll Number (Optional)</FormLabel>
+                <FormLabel>Roll Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="CS-24-001" {...field} />
+                  <Input placeholder="cs24b1001" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,14 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, Bell, Paintbrush, ShieldCheck, LogOut } from "lucide-react";
+import { ChevronRight, Bell, Paintbrush, ShieldCheck, LogOut, GraduationCap, Code2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking, useUser, useAuth } from "@/firebase";
@@ -18,8 +16,13 @@ import { useTheme } from "next-themes";
 import { signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 
+const branchMap: Record<string, string> = {
+  ad: "Artificial Intelligence",
+  cs: "Computer Science",
+  mc: "Mathematics and Computing",
+};
+
 export default function ProfilePage() {
-  const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
   const firestore = useFirestore();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
@@ -107,6 +110,20 @@ export default function ProfilePage() {
     }
   }
   
+  const getAcademicInfo = (rollNumber: string | undefined) => {
+    if (!rollNumber || rollNumber.length < 4) return { branch: 'N/A', batch: 'N/A' };
+    const branchCode = rollNumber.substring(0, 2).toLowerCase();
+    const yearCode = rollNumber.substring(2, 4);
+    
+    const branch = branchMap[branchCode] || 'Unknown Branch';
+    
+    const startYear = parseInt(`20${yearCode}`);
+    const endYear = startYear + 4;
+    const batch = `${startYear}-${endYear}`;
+
+    return { branch, batch };
+  }
+
   if (isUserLoading || isProfileLoading) {
     return <div className="p-4 text-center">Loading profile...</div>;
   }
@@ -121,19 +138,28 @@ export default function ProfilePage() {
   }
 
   const { name: userName, email: userEmail, rollNumber: userRoll, role: userRole } = userProfile;
+  const { branch, batch } = getAcademicInfo(userRoll);
+
 
   return (
     <div className="p-4 space-y-6">
       <div className="flex flex-col items-center space-y-2">
         <Avatar className="h-24 w-24 border-4 border-background shadow-md">
-          {userAvatar && (
-            <AvatarImage src={user.photoURL || userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />
-          )}
-          <AvatarFallback>{userName?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
+          <AvatarFallback className="text-4xl font-headline">{userName?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
         </Avatar>
         <h1 className="text-2xl font-bold text-primary font-headline">{userName}</h1>
         <p className="text-sm text-muted-foreground">{userEmail}</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap justify-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Code2 className="h-4 w-4" />
+            <span>{branch}</span>
+          </div>
+          <div className="flex items-center gap-1">
+             <GraduationCap className="h-4 w-4" />
+             <span>{batch}</span>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-2">
             <Badge variant="outline">Roll: {userRoll || 'N/A'}</Badge>
             <Badge variant="secondary">Role: {userRole}</Badge>
         </div>
