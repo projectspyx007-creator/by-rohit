@@ -21,12 +21,14 @@ import { useToast } from "@/hooks/use-toast";
 import { doc, getDoc } from "firebase/firestore";
 import { Separator } from "../ui/separator";
 import { Icons } from "../icons";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  rollNumber: z.string().regex(/^[a-zA-Z]{2}\d{2}[bB]\d{4}$/, { message: "Invalid roll number format (e.g., cs24b1001)." }),
+  rollNumber: z.string().regex(/^[a-zA-Z]{2}\d{2}[bB]\d{4}$/, { message: "Invalid roll number (e.g., cs24b1001)." }),
+  semester: z.coerce.number().min(1, "Semester is required.").max(8, "Semester must be between 1 and 8."),
 });
 
 export function SignUpForm() {
@@ -45,7 +47,7 @@ export function SignUpForm() {
     },
   });
 
-  const handleUserCreation = async (user: User, details: { name: string; email: string; rollNumber?: string; }) => {
+  const handleUserCreation = async (user: User, details: { name: string; email: string; rollNumber?: string; semester?: number; }) => {
     if (!firestore) return;
 
     // Update Firebase Auth profile
@@ -58,6 +60,7 @@ export function SignUpForm() {
       name: details.name,
       email: details.email,
       rollNumber: details.rollNumber || "", 
+      semester: details.semester || 1,
       role: "student",
       createdAt: new Date().toISOString(),
       notifications: true,
@@ -75,7 +78,8 @@ export function SignUpForm() {
         await handleUserCreation(user, {
             name: values.name,
             email: values.email,
-            rollNumber: values.rollNumber
+            rollNumber: values.rollNumber,
+            semester: values.semester
         });
       }
     } catch (error: any) {
@@ -162,19 +166,43 @@ export function SignUpForm() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="rollNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Roll Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="cs24b1001" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="rollNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Roll Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="cs24b1001" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="semester"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Semester</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select semester" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
+                        <SelectItem key={sem} value={sem.toString()}>{sem}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? "Creating Account..." : "Create Account"}
           </Button>

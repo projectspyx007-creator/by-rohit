@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, Bell, Paintbrush, ShieldCheck, LogOut, GraduationCap, Code2 } from "lucide-react";
+import { ChevronRight, Bell, Paintbrush, ShieldCheck, LogOut, GraduationCap, Code2, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking, useUser, useAuth } from "@/firebase";
@@ -137,7 +137,7 @@ export default function ProfilePage() {
     );
   }
 
-  const { name: userName, email: userEmail, rollNumber: userRoll, role: userRole } = userProfile;
+  const { name: userName, email: userEmail, rollNumber: userRoll, role: userRole, semester: userSemester } = userProfile;
   const { branch, batch } = getAcademicInfo(userRoll);
 
 
@@ -162,6 +162,10 @@ export default function ProfilePage() {
         <div className="flex gap-2 mt-2">
             <Badge variant="outline">Roll: {userRoll || 'N/A'}</Badge>
             <Badge variant="secondary">Role: {userRole}</Badge>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <BookOpen className="h-3 w-3" />
+              Sem: {userSemester}
+            </Badge>
         </div>
       </div>
 
