@@ -33,13 +33,26 @@
       { "subject": "Introduction to Computer Science", "room": "LR 4", "teacher": "Dr. Mehbub Alam", "day": "Friday", "start": "16:00", "end": "17:25", "color": "#5E35B1" }
     ],
     "3": [
-      { "subject": "Data Structures & Algorithms", "room": "C-101", "teacher": "Dr. Evelyn Reed", "day": "Monday", "start": "09:00", "end": "10:00", "color": "#F9A825" },
-      { "subject": "Object Oriented Programming", "room": "C-102", "teacher": "Prof. Samuel Chen", "day": "Monday", "start": "11:00", "end": "12:00", "color": "#1E88E5" },
-      { "subject": "Discrete Mathematics", "room": "B-201", "teacher": "Dr. Maria Garcia", "day": "Tuesday", "start": "10:00", "end": "11:00", "color": "#43A047" },
-      { "subject": "Data Structures & Algorithms", "room": "C-101", "teacher": "Dr. Evelyn Reed", "day": "Wednesday", "start": "09:00", "end": "10:00", "color": "#F9A825" },
-      { "subject": "Object Oriented Programming", "room": "C-102", "teacher": "Prof. Samuel Chen", "day": "Wednesday", "start": "11:00", "end": "12:00", "color": "#1E88E5" },
-      { "subject": "Discrete Mathematics", "room": "B-201", "teacher": "Dr. Maria Garcia", "day": "Thursday", "start": "10:00", "end": "11:00", "color": "#43A047" },
-      { "subject": "Digital Logic Design", "room": "Lab-3", "teacher": "Mr. David Lee", "day": "Friday", "start": "14:00", "end": "16:00", "color": "#D81B60" }
+      { "subject": "Intro to Probability, Stats & Random Process (MA203)", "room": "RN 222", "teacher": "Dr. Arnav Ghosh", "day": "Monday", "start": "09:00", "end": "09:55", "color": "#F9A825" },
+      { "subject": "Theory of Computation (CS251)", "room": "LR 1", "teacher": "Dr. Ramesh K. Jallu", "day": "Monday", "start": "10:00", "end": "10:55", "color": "#1E88E5" },
+      { "subject": "Software Engineering (CS210)", "room": "LR 4", "teacher": "Dr. Priodyuti Pradhan", "day": "Monday", "start": "14:30", "end": "15:55", "color": "#D81B60" },
+      { "subject": "Intro to Python Programming (CS213)", "room": "LR 3", "teacher": "Dr. D. Gyaneshwar", "day": "Tuesday", "start": "10:00", "end": "10:55", "color": "#00897B" },
+      { "subject": "Data Structures (CS204)", "room": "LR 4", "teacher": "Dr. Anup Kumar Halder", "day": "Tuesday", "start": "11:00", "end": "11:55", "color": "#43A047" },
+      { "subject": "I5/IPR/Intro to Entrepreneurship (LA207/LA203/LA313)", "room": "LR 4", "teacher": "Prof. HK Sardana / Dr. Anil Jain", "day": "Tuesday", "start": "12:00", "end": "12:55", "color": "#5E35B1" },
+      { "subject": "Computer Architecture (CS241)", "room": "LR 1", "teacher": "Dr. Natesha BV", "day": "Tuesday", "start": "16:00", "end": "17:25", "color": "#F4511E" },
+      { "subject": "Theory of Computation (CS251)", "room": "LR 1", "teacher": "Dr. Ramesh K. Jallu", "day": "Wednesday", "start": "09:00", "end": "09:55", "color": "#1E88E5" },
+      { "subject": "Intro to Probability, Stats & Random Process (MA203)", "room": "RN 222", "teacher": "Dr. Arnav Ghosh", "day": "Wednesday", "start": "11:00", "end": "11:55", "color": "#F9A825" },
+      { "subject": "I5/IPR/Intro to Entrepreneurship (LA207/LA203/LA313)", "room": "LR 4", "teacher": "Prof. HK Sardana / Dr. Anil Jain", "day": "Wednesday", "start": "12:00", "end": "12:55", "color": "#5E35B1" },
+      { "subject": "Data Structures (CS204)", "room": "LR 4", "teacher": "Dr. Anup Kumar Halder", "day": "Wednesday", "start": "14:30", "end": "15:25", "color": "#43A047" },
+      { "subject": "Lab (CS204)", "room": "Lab", "teacher": "Dr. Anup Kumar Halder", "day": "Wednesday", "start": "16:00", "end": "17:25", "color": "#43A047" },
+      { "subject": "Intro to Probability, Stats & Random Process (MA203)", "room": "RN 222", "teacher": "Dr. Arnav Ghosh", "day": "Thursday", "start": "10:00", "end": "10:55", "color": "#F9A825" },
+      { "subject": "Theory of Computation (CS251)", "room": "LR 1", "teacher": "Dr. Ramesh K. Jallu", "day": "Thursday", "start": "11:00", "end": "11:55", "color": "#1E88E5" },
+      { "subject": "Intro to Python Programming (CS213)", "room": "LR 3", "teacher": "Dr. D. Gyaneshwar", "day": "Thursday", "start": "12:00", "end": "12:55", "color": "#00897B" },
+      { "subject": "Software Engineering (CS210)", "room": "LR 4", "teacher": "Dr. Priodyuti Pradhan", "day": "Thursday", "start": "16:00", "end": "17:25", "color": "#D81B60" },
+      { "subject": "Intro to Python Programming (CS213)", "room": "LR 3", "teacher": "Dr. D. Gyaneshwar", "day": "Friday", "start": "09:00", "end": "09:55", "color": "#00897B" },
+      { "subject": "Data Structures (CS204)", "room": "LR 4", "teacher": "Dr. Anup Kumar Halder", "day": "Friday", "start": "10:00", "end": "10:55", "color": "#43A047" },
+      { "subject": "I5/IPR/Intro to Entrepreneurship (LA207/LA203/LA313)", "room": "LR 4", "teacher": "Prof. HK Sardana / Dr. Anil Jain", "day": "Friday", "start": "12:00", "end": "12:55", "color": "#5E35B1" },
+      { "subject": "Computer Architecture (CS241)", "room": "LR 1", "teacher": "Dr. Natesha BV", "day": "Friday", "start": "14:30", "end": "15:55", "color": "#F4511E" }
     ]
   },
   "ad": {
@@ -125,5 +138,3 @@
     ]
   }
 }
-
-    
