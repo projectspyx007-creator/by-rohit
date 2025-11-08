@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,9 +27,7 @@ export function NotificationScheduler() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [permission, setPermission] = useState('default');
-  
-  // Using a hardcoded guest ID for now to bypass authentication
-  const guestUserId = "guest-timetable";
+  const { user } = useUser();
 
   // Effect to update notification permission state from the browser
   useEffect(() => {
@@ -45,15 +43,15 @@ export function NotificationScheduler() {
   }, [permission]);
 
   const userRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'users', guestUserId);
-  }, [firestore]);
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
   const { data: userProfile } = useDoc<UserProfile>(userRef);
 
   const timetableRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'timetables', guestUserId);
-  }, [firestore]);
+    if (!firestore || !user) return null;
+    return doc(firestore, 'timetables', user.uid);
+  }, [firestore, user]);
   const { data: timetable } = useDoc<TimetableDoc>(timetableRef);
 
   useEffect(() => {

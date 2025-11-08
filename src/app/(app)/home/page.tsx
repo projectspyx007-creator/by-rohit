@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Lightbulb, BrainCircuit } from 'lucide-react';
 import { generateDailyQuote } from '@/ai/flows/generate-daily-quote';
 import { generateHourlyQuestion } from '@/ai/flows/generate-hourly-question';
+import { useUser } from '@/firebase';
 
 type Quote = {
   quote: string;
@@ -16,7 +17,8 @@ type Question = {
 }
 
 export default function HomePage() {
-  const userName = "Alex"; // This would come from user data
+  const { user } = useUser();
+  const userName = user?.displayName?.split(' ')[0] || "Friend";
   const [greeting, setGreeting] = useState("");
   const [quote, setQuote] = useState<Quote | null>(null);
   const [question, setQuestion] = useState<Question | null>(null);

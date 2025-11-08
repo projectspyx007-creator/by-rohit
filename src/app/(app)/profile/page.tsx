@@ -8,26 +8,29 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, Bell, Paintbrush, ShieldCheck } from "lucide-react";
+import { ChevronRight, Bell, Paintbrush, ShieldCheck, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking } from "@/firebase";
+import { useFirestore, useDoc, useMemoFirebase, setDocumentNonBlocking, useUser, useAuth } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { useTheme } from "next-themes";
+import { signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
   const firestore = useFirestore();
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
-  // Using a hardcoded guest ID for now to bypass authentication
-  const guestUserId = "guest-timetable";
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
 
   const userRef = useMemoFirebase(() => {
-    if (!firestore) return null;
-    return doc(firestore, 'users', guestUserId);
-  }, [firestore]);
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
   
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userRef);
   const [notificationPermission, setNotificationPermission] = useState('default');
@@ -90,24 +93,48 @@ export default function ProfilePage() {
     }
   };
   
-  const userName = "Guest User";
-  const userEmail = "guest@example.com";
-  const userRoll = "N/A";
-  const userRole = "Student";
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/signin');
+    } catch (error) {
+      console.error("Error signing out: ", error);
+      toast({
+        variant: 'destructive',
+        title: 'Sign Out Error',
+        description: 'There was a problem signing you out. Please try again.'
+      })
+    }
+  }
+  
+  if (isUserLoading || isProfileLoading) {
+    return <div className="p-4 text-center">Loading profile...</div>;
+  }
+  
+  if (!user || !userProfile) {
+     return (
+        <div className="p-4 text-center">
+            <p>Could not load user profile.</p>
+            <Button onClick={handleSignOut}>Sign In</Button>
+        </div>
+    );
+  }
+
+  const { name: userName, email: userEmail, rollNumber: userRoll, role: userRole } = userProfile;
 
   return (
     <div className="p-4 space-y-6">
       <div className="flex flex-col items-center space-y-2">
         <Avatar className="h-24 w-24 border-4 border-background shadow-md">
           {userAvatar && (
-            <AvatarImage src={userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />
+            <AvatarImage src={user.photoURL || userAvatar.imageUrl} alt="User avatar" data-ai-hint={userAvatar.imageHint} />
           )}
-          <AvatarFallback>{userName.charAt(0) || 'U'}</AvatarFallback>
+          <AvatarFallback>{userName?.charAt(0)?.toUpperCase() || 'U'}</AvatarFallback>
         </Avatar>
         <h1 className="text-2xl font-bold text-primary font-headline">{userName}</h1>
         <p className="text-sm text-muted-foreground">{userEmail}</p>
         <div className="flex gap-2">
-            <Badge variant="outline">Roll: {userRoll}</Badge>
+            <Badge variant="outline">Roll: {userRoll || 'N/A'}</Badge>
             <Badge variant="secondary">Role: {userRole}</Badge>
         </div>
       </div>
@@ -149,6 +176,14 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
       
+       <Card className="rounded-xl shadow-sm">
+        <CardContent className="p-2">
+           <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleSignOut}>
+            <LogOut className="mr-2 h-5 w-5" />
+            Sign Out
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
