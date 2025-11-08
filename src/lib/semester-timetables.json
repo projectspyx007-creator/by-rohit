@@ -3,21 +3,21 @@
   "cs": {
     "1": [
       { "subject": "Mathematics I", "room": "RN 120", "teacher": "Dr. Bharat Soni", "day": "Monday", "start": "09:00", "end": "09:55", "color": "#F9A825" },
-      { "subject": "Digital Logic Design/Digital Systems Design", "room": "RN 120", "teacher": "Dr. Jahnvi Tiwari", "day": "Monday", "start": "14:30", "end": "15:55", "color": "#D81B60" },
+      { "subject": "Digital Logic Design", "room": "RN 120", "teacher": "Dr. Jahnvi Tiwari", "day": "Monday", "start": "14:30", "end": "15:55", "color": "#D81B60" },
       { "subject": "Signals and Systems", "room": "LR 4", "teacher": "Dr. D. Gyaneshwar", "day": "Monday", "start": "16:00", "end": "17:25", "color": "#43A047" },
       { "subject": "Introduction to Programming", "room": "LR 4", "teacher": "Dr. Chandra Mohan D", "day": "Tuesday", "start": "10:00", "end": "10:55", "color": "#1E88E5" },
       { "subject": "Introduction to AI and DS", "room": "RN 120", "teacher": "Dr. Priyanka Singh", "day": "Tuesday", "start": "12:00", "end": "12:55", "color": "#8E24AA" },
-      { "subject": "Introduction to Computer Science", "room": "RN 120", "teacher": "Dr. Jahnvi Tiwari", "day": "Tuesday", "start": "14:30", "end": "15:55", "color": "#5E35B1" },
-      { "subject": "Intro to Disabilities/Assistive Technology", "room": "LR4", "teacher": "Prof. HK Sardana", "day": "Tuesday", "start": "16:00", "end": "17:25", "color": "#00897B" },
+      { "subject": "Introduction to Computer Science", "room": "RN 120", "teacher": "Dr. Jahnvi Tiwari", "day": "Tuesday", "start": "14:30", "end": "15:25", "color": "#5E35B1" },
+      { "subject": "Introduction to Disabilities/Assistive Technology", "room": "LR4", "teacher": "Prof. HK Sardana", "day": "Tuesday", "start": "16:00", "end": "17:25", "color": "#00897B" },
       { "subject": "Mathematics I", "room": "RN 120", "teacher": "Dr. Bharat Soni", "day": "Wednesday", "start": "11:00", "end": "11:55", "color": "#F9A825" },
       { "subject": "Introduction to AI and DS", "room": "RN 120", "teacher": "Dr. Priyanka Singh", "day": "Wednesday", "start": "12:00", "end": "12:55", "color": "#8E24AA" },
       { "subject": "Mathematics I", "room": "RN 120", "teacher": "Dr. Bharat Soni", "day": "Thursday", "start": "10:00", "end": "10:55", "color": "#F9A825" },
-      { "subject": "Introduction to Programming", "room": "LR 4", "teacher": "Dr. Chandra Mohan D", "day": "Thursday", "start": "11:00", "end": "11:55", "color": "#1E88E5" },
-      { "subject": "Signals and Systems", "room": "LR 4", "teacher": "Dr. D. Gyaneshwar", "day": "Thursday", "start": "14:30", "end": "15:55", "color": "#43A047" },
+      { "subject": "Introduction to Programming", "room": "LR 4", "teacher": "Dr. Chandra Mohan D", "day": "Thursday", "start": "12:00", "end": "12:55", "color": "#1E88E5" },
+      { "subject": "Signals and Systems", "room": "LR 4", "teacher": "Dr. D. Gyaneshwar", "day": "Thursday", "start": "14:30", "end": "15:25", "color": "#43A047" },
       { "subject": "Digital Logic Design/Digital Systems Design", "room": "RN 120", "teacher": "Dr. Jahnvi Tiwari", "day": "Thursday", "start": "16:00", "end": "17:25", "color": "#D81B60" },
       { "subject": "Introduction to Programming", "room": "LR 4", "teacher": "Dr. Chandra Mohan D", "day": "Friday", "start": "09:00", "end": "09:55", "color": "#1E88E5" },
       { "subject": "Introduction to AI and DS", "room": "RN 120", "teacher": "Dr. Priyanka Singh", "day": "Friday", "start": "12:00", "end": "12:55", "color": "#8E24AA" },
-      { "subject": "Intro to Disabilities/Assistive Technology", "room": "LR4", "teacher": "Prof. HK Sardana", "day": "Friday", "start": "14:30", "end": "15:55", "color": "#00897B" },
+      { "subject": "Introduction to Disabilities/Assistive Technology", "room": "LR4", "teacher": "Prof. HK Sardana", "day": "Friday", "start": "14:30", "end": "15:25", "color": "#00897B" },
       { "subject": "Introduction to Computer Science", "room": "RN 120", "teacher": "Dr. Jahnvi Tiwari", "day": "Friday", "start": "16:00", "end": "17:25", "color": "#5E35B1" }
     ],
     "3": [
