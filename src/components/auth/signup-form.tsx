@@ -28,7 +28,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  rollNumber: z.string().regex(/^[a-zA-Z]{2}\d{2}[bB]\d{4}$/, { message: "Invalid roll number (e.g., cs24b1001)." }),
+  rollNumber: z.string().regex(/^[a-zA-Z]{2}\d{2}[bB]\d{4}$/, { message: "Invalid roll number (e.g., cs24b1053)." }),
   semester: z.coerce.number().min(1, "Semester is required.").max(8, "Semester must be between 1 and 8."),
 });
 
@@ -191,7 +191,7 @@ export function SignUpForm() {
                 <FormItem>
                   <FormLabel>Roll Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="cs24b1001" {...field} />
+                    <Input placeholder="cs24b1053" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
