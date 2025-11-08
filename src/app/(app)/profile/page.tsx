@@ -34,7 +34,7 @@ export default function ProfilePage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
-    if ('Notification' in window) {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
     if (userProfile) {
@@ -45,7 +45,7 @@ export default function ProfilePage() {
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
 
-    if (!('Notification' in window)) {
+    if (typeof window === 'undefined' || !('Notification' in window)) {
       toast({
         variant: "destructive",
         title: "Unsupported Browser",
@@ -90,9 +90,10 @@ export default function ProfilePage() {
     }
   };
   
-  const userName = userProfile?.name || "Guest User";
-  const userEmail = userProfile?.email || "guest@example.com";
-  const userRoll = userProfile?.rollNumber || "N/A";
+  const userName = "Guest User";
+  const userEmail = "guest@example.com";
+  const userRoll = "N/A";
+  const userRole = "Student";
 
   return (
     <div className="p-4 space-y-6">
@@ -107,7 +108,7 @@ export default function ProfilePage() {
         <p className="text-sm text-muted-foreground">{userEmail}</p>
         <div className="flex gap-2">
             <Badge variant="outline">Roll: {userRoll}</Badge>
-            <Badge variant="secondary">Role: {userProfile?.role || 'Student'}</Badge>
+            <Badge variant="secondary">Role: {userRole}</Badge>
         </div>
       </div>
 
