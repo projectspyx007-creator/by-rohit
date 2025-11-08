@@ -15,10 +15,10 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuth, useFirestore, setDocumentNonBlocking } from "@/firebase";
-import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { doc } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { Separator } from "../ui/separator";
 import { Icons } from "../icons";
 
@@ -45,14 +45,15 @@ export function SignUpForm() {
     },
   });
 
-  const handleUserCreation = async (user: any, name?: string, email?: string) => {
+  const handleUserCreation = async (user: User, details: { name: string; email: string; rollNumber?: string; }) => {
+    if (!firestore) return;
     const userRef = doc(firestore, "users", user.uid);
     // Using setDoc directly here is fine as it's part of the sign-up transaction
     await setDocumentNonBlocking(userRef, {
       id: user.uid,
-      name: name || user.displayName || "New User",
-      email: email || user.email,
-      rollNumber: "", // Google sign in doesn't provide this
+      name: details.name || user.displayName || "New User",
+      email: details.email || user.email,
+      rollNumber: details.rollNumber || "", 
       role: "student",
       createdAt: new Date().toISOString(),
       notifications: true,
@@ -61,12 +62,17 @@ export function SignUpForm() {
   }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!auth) return;
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
       if (user) {
-        await handleUserCreation(user, values.name, values.email);
+        await handleUserCreation(user, {
+            name: values.name,
+            email: values.email,
+            rollNumber: values.rollNumber
+        });
       }
     } catch (error: any) {
       toast({
@@ -79,15 +85,23 @@ export function SignUpForm() {
   }
 
   async function onGoogleSignIn() {
+    if (!auth || !firestore) return;
     try {
       const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = userCredential.user;
        if (user) {
-        // Check if it's a new user
-        const isNewUser = userCredential.user.metadata.creationTime === userCredential.user.metadata.lastSignInTime;
-        if(isNewUser) {
-           await handleUserCreation(user);
+        // Check if user document already exists
+        const userDocRef = doc(firestore, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (!userDoc.exists()) {
+           // If it's a new user, create their profile
+           await handleUserCreation(user, {
+               name: user.displayName || "New User",
+               email: user.email || ""
+           });
         } else {
+            // If they exist, just log them in
             router.push("/home");
         }
       }
