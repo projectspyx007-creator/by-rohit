@@ -1,0 +1,34 @@
+
+{
+  "cs": {
+    "3": [
+      { "subject": "Data Structures & Algorithms", "room": "C-101", "teacher": "Dr. Evelyn Reed", "day": "Monday", "start": "09:00", "end": "10:00", "color": "#F9A825" },
+      { "subject": "Object Oriented Programming", "room": "C-102", "teacher": "Prof. Samuel Chen", "day": "Monday", "start": "11:00", "end": "12:00", "color": "#1E88E5" },
+      { "subject": "Discrete Mathematics", "room": "B-201", "teacher": "Dr. Maria Garcia", "day": "Tuesday", "start": "10:00", "end": "11:00", "color": "#43A047" },
+      { "subject": "Data Structures & Algorithms", "room": "C-101", "teacher": "Dr. Evelyn Reed", "day": "Wednesday", "start": "09:00", "end": "10:00", "color": "#F9A825" },
+      { "subject": "Object Oriented Programming", "room": "C-102", "teacher": "Prof. Samuel Chen", "day": "Wednesday", "start": "11:00", "end": "12:00", "color": "#1E88E5" },
+      { "subject": "Discrete Mathematics", "room": "B-201", "teacher": "Dr. Maria Garcia", "day": "Thursday", "start": "10:00", "end": "11:00", "color": "#43A047" },
+      { "subject": "Digital Logic Design", "room": "Lab-3", "teacher": "Mr. David Lee", "day": "Friday", "start": "14:00", "end": "16:00", "color": "#D81B60" }
+    ]
+  },
+  "ad": {
+    "3": [
+      { "subject": "Introduction to AI", "room": "D-201", "teacher": "Dr. Kenji Tanaka", "day": "Monday", "start": "10:00", "end": "11:00", "color": "#8E24AA" },
+      { "subject": "Linear Algebra", "room": "D-202", "teacher": "Prof. Olivia White", "day": "Tuesday", "start": "11:00", "end": "12:00", "color": "#00897B" },
+      { "subject": "Python for Data Science", "room": "Lab-5", "teacher": "Ms. Chloe Brown", "day": "Tuesday", "start": "14:00", "end": "16:00", "color": "#5E35B1" },
+      { "subject": "Introduction to AI", "room": "D-201", "teacher": "Dr. Kenji Tanaka", "day": "Wednesday", "start": "10:00", "end": "11:00", "color": "#8E24AA" },
+      { "subject": "Linear Algebra", "room": "D-202", "teacher": "Prof. Olivia White", "day": "Thursday", "start": "11:00", "end": "12:00", "color": "#00897B" },
+      { "subject": "Ethics in AI", "room": "D-201", "teacher": "Dr. Kenji Tanaka", "day": "Friday", "start": "09:00", "end": "10:00", "color": "#F4511E" }
+    ]
+  },
+  "mc": {
+    "3": [
+        { "subject": "Calculus III", "room": "E-301", "teacher": "Dr. Robert Green", "day": "Monday", "start": "09:00", "end": "10:00", "color": "#3949AB" },
+        { "subject": "Probability & Statistics", "room": "E-302", "teacher": "Dr. Laura Scott", "day": "Monday", "start": "11:00", "end": "12:00", "color": "#C0CA33" },
+        { "subject": "Intro to Computing", "room": "Lab-1", "teacher": "Prof. James Hall", "day": "Tuesday", "start": "14:00", "end": "16:00", "color": "#FB8C00" },
+        { "subject": "Calculus III", "room": "E-301", "teacher": "Dr. Robert Green", "day": "Wednesday", "start": "09:00", "end": "10:00", "color": "#3949AB" },
+        { "subject": "Probability & Statistics", "room": "E-302", "teacher": "Dr. Laura Scott", "day": "Thursday", "start": "11:00", "end": "12:00", "color": "#C0CA33" },
+        { "subject": "Mechanics", "room": "E-301", "teacher": "Dr. Robert Green", "day": "Friday", "start": "10:00", "end": "11:00", "color": "#6D4C41" }
+    ]
+  }
+}

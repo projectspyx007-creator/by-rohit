@@ -22,6 +22,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { Separator } from "../ui/separator";
 import { Icons } from "../icons";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import semesterTimetables from '@/lib/semester-timetables.json';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -30,6 +31,10 @@ const formSchema = z.object({
   rollNumber: z.string().regex(/^[a-zA-Z]{2}\d{2}[bB]\d{4}$/, { message: "Invalid roll number (e.g., cs24b1001)." }),
   semester: z.coerce.number().min(1, "Semester is required.").max(8, "Semester must be between 1 and 8."),
 });
+
+type SemesterTimetables = Record<string, Record<string, any[]>>;
+
+const getBranchFromRoll = (rollNumber: string) => rollNumber.substring(0, 2).toLowerCase();
 
 export function SignUpForm() {
   const auth = useAuth();
@@ -50,11 +55,9 @@ export function SignUpForm() {
   const handleUserCreation = async (user: User, details: { name: string; email: string; rollNumber?: string; semester?: number; }) => {
     if (!firestore) return;
 
-    // Update Firebase Auth profile
     await updateProfile(user, { displayName: details.name });
 
     const userRef = doc(firestore, "users", user.uid);
-    // Using setDoc directly here is fine as it's part of the sign-up transaction
     await setDocumentNonBlocking(userRef, {
       id: user.uid,
       name: details.name,
@@ -65,6 +68,23 @@ export function SignUpForm() {
       createdAt: new Date().toISOString(),
       notifications: true,
     }, { merge: true });
+
+    // Pre-fill timetable if branch and semester are available
+    if (details.rollNumber && details.semester) {
+      const branch = getBranchFromRoll(details.rollNumber);
+      const semester = details.semester.toString();
+      const timetables = semesterTimetables as SemesterTimetables;
+
+      if (timetables[branch] && timetables[branch][semester]) {
+        const timetableEntries = timetables[branch][semester].map(entry => ({
+          ...entry,
+          id: `entry-${Date.now()}-${Math.random()}` // Add unique ID
+        }));
+        const timetableRef = doc(firestore, 'timetables', user.uid);
+        await setDocumentNonBlocking(timetableRef, { entries: timetableEntries }, { merge: true });
+      }
+    }
+
     router.push("/home");
   }
 
@@ -98,18 +118,15 @@ export function SignUpForm() {
       const userCredential = await signInWithPopup(auth, new GoogleAuthProvider());
       const user = userCredential.user;
        if (user) {
-        // Check if user document already exists
         const userDocRef = doc(firestore, 'users', user.uid);
         const userDoc = await getDoc(userDocRef);
         
         if (!userDoc.exists()) {
-           // If it's a new user, create their profile
            await handleUserCreation(user, {
                name: user.displayName || "New User",
                email: user.email || ""
            });
         } else {
-            // If they exist, just log them in
             router.push("/home");
         }
       }

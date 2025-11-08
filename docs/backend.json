@@ -128,7 +128,7 @@
           "type": "array",
           "description": "Array of timetable entries.",
           "items": {
-            "type": "string"
+            "$ref": "#/backend/entities/TimetableEntry"
           }
         }
       },
@@ -144,6 +144,10 @@
       "type": "object",
       "description": "Represents a single entry in a user's timetable.",
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the timetable entry."
+        },
         "subject": {
           "type": "string",
           "description": "The subject or course name."
