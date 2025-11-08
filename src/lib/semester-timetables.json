@@ -139,12 +139,24 @@
       { "subject": "Introduction to Computer Science", "room": "LR 4", "teacher": "Dr. Mehbub Alam", "day": "Friday", "start": "16:00", "end": "17:25", "color": "#5E35B1" }
     ],
     "3": [
-        { "subject": "Calculus III", "room": "E-301", "teacher": "Dr. Robert Green", "day": "Monday", "start": "09:00", "end": "10:00", "color": "#3949AB" },
-        { "subject": "Probability & Statistics", "room": "E-302", "teacher": "Dr. Laura Scott", "day": "Monday", "start": "11:00", "end": "12:00", "color": "#C0CA33" },
-        { "subject": "Intro to Computing", "room": "Lab-1", "teacher": "Prof. James Hall", "day": "Tuesday", "start": "14:00", "end": "16:00", "color": "#FB8C00" },
-        { "subject": "Calculus III", "room": "E-301", "teacher": "Dr. Robert Green", "day": "Wednesday", "start": "09:00", "end": "10:00", "color": "#3949AB" },
-        { "subject": "Probability & Statistics", "room": "E-302", "teacher": "Dr. Laura Scott", "day": "Thursday", "start": "11:00", "end": "12:00", "color": "#C0CA33" },
-        { "subject": "Mechanics", "room": "E-301", "teacher": "Dr. Robert Green", "day": "Friday", "start": "10:00", "end": "11:00", "color": "#6D4C41" }
+      { "subject": "Introduction to Probability and Random Process", "code": "MC202", "teacher": "Dr Alka", "room": "Seminar Hall", "day": "Monday", "start": "09:00", "end": "09:55", "color": "#5E35B1" },
+      { "subject": "Introduction to Probability and Random Process", "code": "MC202", "teacher": "Dr Alka", "room": "Seminar Hall", "day": "Monday", "start": "10:00", "end": "10:55", "color": "#5E35B1" },
+      { "subject": "Introduction to Python Programming", "code": "CS213", "teacher": "Dr. Gyaneshwar", "room": "Seminar Hall", "day": "Monday", "start": "11:00", "end": "11:55", "color": "#1E88E5" },
+      { "subject": "Formal Languages and Automata Theory", "code": "CS203", "teacher": "Dr. Ramesh K. Jallu", "room": "LR 3", "day": "Monday", "start": "14:30", "end": "15:55", "color": "#D81B60" },
+      { "subject": "Group and Ring Theory", "code": "MC201", "teacher": "Dr Alka", "room": "RN 118", "day": "Tuesday", "start": "10:00", "end": "10:55", "color": "#00897B" },
+      { "subject": "Data Structures and Applications", "code": "CS206", "teacher": "Dr. Chandra Mohan D", "room": "LR 3", "day": "Tuesday", "start": "12:00", "end": "12:55", "color": "#43A047" },
+      { "subject": "Number Theory", "code": "MA204", "teacher": "Dr. Arnav Ghosh", "room": "RN 118", "day": "Tuesday", "start": "14:30", "end": "15:55", "color": "#F4511E" },
+      { "subject": "Introduction to Python Programming", "code": "CS213", "teacher": "Dr. Gyaneshwar", "room": "Seminar Hall", "day": "Wednesday", "start": "10:00", "end": "10:55", "color": "#1E88E5" },
+      { "subject": "Introduction to Probability and Random Process", "code": "MC202", "teacher": "Dr Alka", "room": "Seminar Hall", "day": "Wednesday", "start": "11:00", "end": "11:55", "color": "#5E35B1" },
+      { "subject": "Data Structures and Applications", "code": "CS206", "teacher": "Dr. Chandra Mohan D", "room": "LR 3", "day": "Wednesday", "start": "12:00", "end": "12:55", "color": "#43A047" },
+      { "subject": "Lab (CS206)", "code": "CS206", "teacher": "Dr. Chandra Mohan D", "room": "Lab", "day": "Wednesday", "start": "14:30", "end": "15:55", "color": "#43A047" },
+      { "subject": "Introduction to Python Programming", "code": "CS213", "teacher": "Dr. Gyaneshwar", "room": "Seminar Hall", "day": "Thursday", "start": "09:00", "end": "09:55", "color": "#1E88E5" },
+      { "subject": "Introduction to Probability and Random Process", "code": "MC202", "teacher": "Dr Alka", "room": "Seminar Hall", "day": "Thursday", "start": "10:00", "end": "10:55", "color": "#5E35B1" },
+      { "subject": "Group and Ring Theory", "code": "MC201", "teacher": "Dr Alka", "room": "RN 118", "day": "Thursday", "start": "11:00", "end": "11:55", "color": "#00897B" },
+      { "subject": "Formal Languages and Automata Theory", "code": "CS203", "teacher": "Dr. Ramesh K. Jallu", "room": "LR 3", "day": "Thursday", "start": "16:00", "end": "17:25", "color": "#D81B60" },
+      { "subject": "Group and Ring Theory", "code": "MC201", "teacher": "Dr Alka", "room": "RN 118", "day": "Friday", "start": "10:00", "end": "10:55", "color": "#00897B" },
+      { "subject": "Data Structures and Applications", "code": "CS206", "teacher": "Dr. Chandra Mohan D", "room": "LR 3", "day": "Friday", "start": "12:00", "end": "12:55", "color": "#43A047" },
+      { "subject": "Number Theory", "code": "MA204", "teacher": "Dr. Arnav Ghosh", "room": "RN 118", "day": "Friday", "start": "16:00", "end": "17:25", "color": "#F4511E" }
     ]
   }
 }
