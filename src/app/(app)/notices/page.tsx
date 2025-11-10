@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pin, Plus, MoreVertical, Trash2 } from 'lucide-react';
+import { Pin, Plus, MoreVertical, Trash2, Pencil } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -43,7 +43,7 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore, useCollection, addDocumentNonBlocking, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
+import { useFirestore, useCollection, addDocumentNonBlocking, setDocumentNonBlocking, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
@@ -52,33 +52,55 @@ const noticeSchema = z.object({
   content: z.string().min(1, { message: 'Content is required.' }),
 });
 
+// Notice type based on our data structure
+type Notice = {
+  id: string;
+  title: string;
+  body: string;
+  authorName: string;
+  authorId?: string;
+  createdAt: string;
+  pinned: boolean;
+  tags: string[];
+  attachments: string[];
+}
 
-function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => void }) {
+function NoticeForm({ setDialogOpen, noticeToEdit }: { setDialogOpen: (open: boolean) => void, noticeToEdit?: Notice | null }) {
   const firestore = useFirestore();
   const { user } = useUser();
-  const noticesCollection = useMemoFirebase(() => collection(firestore, 'notices'), [firestore]);
 
   const form = useForm<z.infer<typeof noticeSchema>>({
     resolver: zodResolver(noticeSchema),
     defaultValues: {
-      title: '',
-      content: '',
+      title: noticeToEdit?.title || '',
+      content: noticeToEdit?.body || '',
     },
   });
 
   const onSubmit = async (values: z.infer<typeof noticeSchema>) => {
-    if (!noticesCollection || !user) return;
-    
-    addDocumentNonBlocking(noticesCollection, {
-      title: values.title,
-      body: values.content,
-      authorName: user.displayName || 'Anonymous',
-      authorId: user.uid,
-      createdAt: new Date().toISOString(),
-      pinned: false,
-      tags: [],
-      attachments: [],
-    });
+    if (!firestore || !user) return;
+
+    if (noticeToEdit) {
+      // Update existing notice
+      const noticeRef = doc(firestore, 'notices', noticeToEdit.id);
+      setDocumentNonBlocking(noticeRef, {
+        title: values.title,
+        body: values.content,
+      }, { merge: true });
+    } else {
+      // Create new notice
+      const noticesCollection = collection(firestore, 'notices');
+      addDocumentNonBlocking(noticesCollection, {
+        title: values.title,
+        body: values.content,
+        authorName: user.displayName || 'Anonymous',
+        authorId: user.uid,
+        createdAt: new Date().toISOString(),
+        pinned: false,
+        tags: [],
+        attachments: [],
+      });
+    }
     
     form.reset();
     setDialogOpen(false);
@@ -107,14 +129,17 @@ function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => vo
             <FormItem>
               <Label htmlFor="content">Content</Label>
               <FormControl>
-                <Textarea id="content" placeholder="Enter notice content" {...field} />
+                <Textarea id="content" placeholder="Enter notice content" {...field} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? 'Adding...' : 'Add Notice'}
+          {form.formState.isSubmitting 
+            ? (noticeToEdit ? 'Saving...' : 'Adding...')
+            : (noticeToEdit ? 'Save Changes' : 'Add Notice')
+          }
         </Button>
       </form>
     </Form>
@@ -130,10 +155,11 @@ export default function NoticesPage() {
     return query(collection(firestore, 'notices'), orderBy('createdAt', 'desc'));
   }, [firestore]);
 
-  const { data: notices, isLoading } = useCollection(noticesQuery);
+  const { data: notices, isLoading } = useCollection<Notice>(noticesQuery);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
+  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
 
   const handleDelete = () => {
     if (!firestore || !selectedNoticeId) return;
@@ -148,11 +174,21 @@ export default function NoticesPage() {
     setIsAlertOpen(true);
   }
 
+  const handleEdit = (notice: Notice) => {
+    setEditingNotice(notice);
+    setIsDialogOpen(true);
+  }
+
+  const handleAddNew = () => {
+    setEditingNotice(null);
+    setIsDialogOpen(true);
+  }
+
   const pinnedNotices = notices?.filter((n) => n.pinned) || [];
   const otherNotices = notices?.filter((n) => !n.pinned) || [];
 
-  const NoticeCard = ({ notice }: { notice: any }) => {
-    // Show delete if user is the author OR if authorId is missing (for legacy notices)
+  const NoticeCard = ({ notice }: { notice: Notice }) => {
+    // Show actions if user is the author OR if authorId is missing (for legacy notices)
     const isAuthor = user && (!notice.authorId || user.uid === notice.authorId);
 
     return (
@@ -190,6 +226,9 @@ export default function NoticesPage() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                     <DropdownMenuItem onSelect={() => handleEdit(notice)}>
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                    </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => openDeleteConfirm(notice.id)} className="text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
@@ -236,19 +275,20 @@ export default function NoticesPage() {
         </div>
       )}
 
+      <Button onClick={handleAddNew} className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg">
+        <Plus className="h-6 w-6" />
+        <span className="sr-only">Add Notice</span>
+      </Button>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <Button className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg">
-            <Plus className="h-6 w-6" />
-            <span className="sr-only">Add Notice</span>
-          </Button>
-        </DialogTrigger>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) setEditingNotice(null);
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create a New Notice</DialogTitle>
+            <DialogTitle>{editingNotice ? 'Edit Notice' : 'Create a New Notice'}</DialogTitle>
           </DialogHeader>
-          <NewNoticeForm setDialogOpen={setIsDialogOpen} />
+          <NoticeForm setDialogOpen={setIsDialogOpen} noticeToEdit={editingNotice} />
         </DialogContent>
       </Dialog>
       
