@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useFirestore, useDoc, useMemoFirebase, useUser } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { useToast } from '@/hooks/use-toast';
 
 type TimetableEntry = {
   id: string;
@@ -25,22 +24,9 @@ type UserProfile = {
 
 export function NotificationScheduler() {
   const firestore = useFirestore();
-  const { toast } = useToast();
-  const [permission, setPermission] = useState('default');
   const { user } = useUser();
-
-  // Effect to update notification permission state from the browser
-  useEffect(() => {
-    if ('Notification' in window) {
-      setPermission(Notification.permission);
-      const interval = setInterval(() => {
-        if (Notification.permission !== permission) {
-          setPermission(Notification.permission);
-        }
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [permission]);
+  const scheduledNotificationsRef = useRef(new Set<string>());
+  const scheduledTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
 
   const userRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -55,54 +41,65 @@ export function NotificationScheduler() {
   const { data: timetable } = useDoc<TimetableDoc>(timetableRef);
 
   useEffect(() => {
-    // Exit if permissions are not granted, or if necessary data is missing
-    if (permission !== 'granted' || !timetable?.entries || !userProfile?.notifications) {
-      return;
-    }
+    const scheduleNotifications = () => {
+      // Clear any previously scheduled timeouts to avoid duplicates
+      scheduledTimeoutsRef.current.forEach(clearTimeout);
+      scheduledTimeoutsRef.current = [];
 
-    const scheduledNotifications = new Set<string>();
+      // Exit if permissions aren't granted or data is missing
+      if (Notification.permission !== 'granted' || !timetable?.entries || !userProfile?.notifications) {
+        return;
+      }
 
-    const scheduleNotificationsForToday = () => {
       const now = new Date();
-      const today = now.toLocaleDateString('en-US', { weekday: 'long' }); // e.g., "Monday"
+      const todayDayString = now.toLocaleDateString('en-US', { weekday: 'long' });
 
       timetable.entries.forEach((entry) => {
-        if (entry.day !== today) return;
+        if (entry.day !== todayDayString) return;
 
         const [hours, minutes] = entry.start.split(':').map(Number);
         const classTime = new Date();
         classTime.setHours(hours, minutes, 0, 0);
 
-        // Schedule notification 15 minutes before class
+        // Schedule notification 15 minutes before the class
         const notificationTime = new Date(classTime.getTime() - 15 * 60 * 1000);
-        
-        // Generate a unique ID for this specific notification instance
-        const notificationId = `class-${entry.id}-${classTime.getFullYear()}-${classTime.getMonth()}-${classTime.getDate()}`;
 
-        // Check if the notification time is in the future and hasn't already been scheduled
-        if (notificationTime > now && !scheduledNotifications.has(notificationId)) {
+        // A unique ID for this specific day's notification instance
+        const notificationId = `class-reminder-${entry.id}-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+        
+        // Check if the notification time is in the future and not already fired today
+        if (notificationTime > now && !scheduledNotificationsRef.current.has(notificationId)) {
           const delay = notificationTime.getTime() - now.getTime();
 
-          setTimeout(() => {
-            new Notification(`Class Reminder: ${entry.subject}`, {
-              body: `Your class in ${entry.room} starts in 15 minutes.`,
-              icon: '/coffee-icon.png', // Optional: add an icon to your public folder
-            });
+          const timeoutId = setTimeout(() => {
+            // Check permission again right before sending
+            if (Notification.permission === 'granted') {
+              new Notification(`Class Reminder: ${entry.subject}`, {
+                body: `Your class in ${entry.room} starts in 15 minutes.`,
+                icon: '/coffee-icon.png',
+                tag: notificationId, // Use tag to prevent re-notification if already shown
+              });
+              // Mark this notification as fired for this session
+              scheduledNotificationsRef.current.add(notificationId);
+            }
           }, delay);
-
-          scheduledNotifications.add(notificationId);
+          
+          scheduledTimeoutsRef.current.push(timeoutId);
         }
       });
     };
-    
-    scheduleNotificationsForToday();
-    
-    // Check for new classes to schedule every minute
-    const interval = setInterval(scheduleNotificationsForToday, 60000);
-    
-    return () => clearInterval(interval);
 
-  }, [timetable, permission, userProfile, toast]);
+    // Run the scheduler immediately and then every minute
+    scheduleNotifications();
+    const interval = setInterval(scheduleNotifications, 60000);
+
+    // Cleanup on component unmount
+    return () => {
+      clearInterval(interval);
+      scheduledTimeoutsRef.current.forEach(clearTimeout);
+    };
+
+  }, [timetable, userProfile]);
 
   return null; // This component doesn't render anything
 }
