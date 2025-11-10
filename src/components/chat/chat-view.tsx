@@ -57,6 +57,7 @@ export function ChatView({ timetable, notices }: ChatViewProps) {
         message: userInput,
         timetable,
         notices,
+        currentDateTime: new Date().toString(),
       });
 
       const assistantMessage: Message = {

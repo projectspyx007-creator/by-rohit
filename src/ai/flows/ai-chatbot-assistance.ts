@@ -16,6 +16,7 @@ const AIChatbotAssistanceInputSchema = z.object({
   message: z.string().describe('The user message to be processed.'),
   timetable: z.string().describe('The user timetable in JSON string format.'),
   notices: z.string().describe('The latest notices in JSON string format.'),
+  currentDateTime: z.string().describe('The current date and time to provide context to the assistant.'),
 });
 export type AIChatbotAssistanceInput = z.infer<typeof AIChatbotAssistanceInputSchema>;
 
@@ -32,7 +33,9 @@ const aiChatbotAssistancePrompt = ai.definePrompt({
   name: 'aiChatbotAssistancePrompt',
   input: {schema: AIChatbotAssistanceInputSchema},
   output: {schema: AIChatbotAssistanceOutputSchema},
-  prompt: `You are College Companion 🤖 — a warm, fun, and helpful AI assistant for college students. You are an expert on the user's schedule and campus notices, but you can also answer general questions about the world, including the current date and time. Your answers should be concise and friendly.
+  prompt: `You are College Companion 🤖 — a warm, fun, and helpful AI assistant for college students. You are an expert on the user's schedule and campus notices.
+
+The current date and time is: {{{currentDateTime}}}.
 
 User's timetable: {{{timetable}}}
 Latest notices: {{{notices}}}
