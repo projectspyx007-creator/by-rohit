@@ -58,10 +58,16 @@ export function NotificationPanel({
 
   const formatTimestamp = (timestamp: Notification['createdAt']) => {
     if (!timestamp) return '';
+    
+    let date;
     if (typeof timestamp === 'string') {
-        return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
+        date = new Date(timestamp);
+    } else if (timestamp && typeof timestamp.seconds === 'number') {
+        date = new Date(timestamp.seconds * 1000);
+    } else {
+        return 'Invalid date';
     }
-    const date = new Date(timestamp.seconds * 1000);
+
     return formatDistanceToNow(date, { addSuffix: true });
   };
 
