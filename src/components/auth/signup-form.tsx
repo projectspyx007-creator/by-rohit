@@ -70,7 +70,7 @@ export function SignUpForm() {
       semester: details.semester || 1,
       role: userRole,
       createdAt: new Date().toISOString(),
-      notifications: true,
+      notifications: true, // Set default to true for all new users
     }, { merge: true });
 
     // Pre-fill timetable if branch and semester are available

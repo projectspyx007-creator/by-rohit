@@ -26,39 +26,43 @@ export const createNotificationOnNewNotice = functions.firestore
       }
 
       const batch = db.batch();
+      let notificationCount = 0;
 
       usersSnapshot.forEach((userDoc) => {
         const userId = userDoc.id;
         const userProfile = userDoc.data();
         
-        // Only send notification if user has them enabled in their profile
-        // This now correctly handles cases where 'notifications' might be undefined
-        if (userProfile.notifications === false) {
-            functions.logger.log(`Skipping notification for user ${userId} because they have disabled them.`);
-            return;
+        // Only send notification if user has them explicitly enabled.
+        if (userProfile.notifications === true) {
+            const notificationRef = db
+              .collection("users")
+              .doc(userId)
+              .collection("notifications")
+              .doc(); // Auto-generate ID
+
+            batch.set(notificationRef, {
+              userId: userId,
+              type: "new_notice",
+              title: `New Notice: ${noticeTitle}`,
+              read: false,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              relatedEntityId: context.params.noticeId,
+            });
+            notificationCount++;
+        } else {
+             functions.logger.log(`Skipping notification for user ${userId} because notifications are not enabled.`);
         }
-
-        const notificationRef = db
-          .collection("users")
-          .doc(userId)
-          .collection("notifications")
-          .doc(); // Auto-generate ID
-
-        batch.set(notificationRef, {
-          userId: userId,
-          type: "new_notice",
-          title: `New Notice: ${noticeTitle}`,
-          read: false,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp for reliability
-          relatedEntityId: context.params.noticeId, // Link to the notice
-        });
       });
 
-      // Commit the batch
-      await batch.commit();
-      functions.logger.log(
-        `Successfully created notifications for ${usersSnapshot.size} users for notice ${context.params.noticeId}.`
-      );
+      if (notificationCount > 0) {
+        // Commit the batch
+        await batch.commit();
+        functions.logger.log(
+          `Successfully created notifications for ${notificationCount} users for notice ${context.params.noticeId}.`
+        );
+      } else {
+        functions.logger.log(`No users with notifications enabled found for notice ${context.params.noticeId}.`);
+      }
     } catch (error) {
       functions.logger.error(
         "Error creating notifications for new notice:",
