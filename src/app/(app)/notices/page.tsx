@@ -152,7 +152,8 @@ export default function NoticesPage() {
   const otherNotices = notices?.filter((n) => !n.pinned) || [];
 
   const NoticeCard = ({ notice }: { notice: any }) => {
-    const isAuthor = user && user.uid === notice.authorId;
+    // Show delete if user is the author OR if authorId is missing (for legacy notices)
+    const isAuthor = user && (!notice.authorId || user.uid === notice.authorId);
 
     return (
       <Card
@@ -168,7 +169,7 @@ export default function NoticesPage() {
                 </CardTitle>
               </Link>
               <CardDescription>
-                By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
+                By {notice.authorName || 'Campus Admin'} on {format(new Date(notice.createdAt), 'PPP')}
               </CardDescription>
             </div>
             <div className="flex items-center gap-1">
