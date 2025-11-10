@@ -48,36 +48,23 @@ export default function ProfilePage() {
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
 
-    // This logic runs when the user tries to turn the toggle ON
-    if (checked) {
-      if (typeof window !== 'undefined' && 'Notification' in window) {
-        // If permissions are already denied, show an error and DON'T turn on the toggle.
-        if (Notification.permission === 'denied') {
-          toast({
-            variant: "destructive",
-            title: "Notifications are Blocked",
-            description: "To receive alerts, please enable notifications for this site in your browser settings.",
-          });
-          // Explicitly keep the UI state as false because we can't enable them.
-          setNotificationsEnabled(false); 
-          return;
-        }
+    // Immediately update the UI and save the preference
+    setNotificationsEnabled(checked);
+    setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
 
-        // If permissions haven't been asked, ask now.
-        if (Notification.permission === 'default') {
-          await Notification.requestPermission();
-        }
-      }
-      
-      // If we get here, permissions are 'granted' or were just granted.
-      // Update UI state and save to database.
-      setNotificationsEnabled(true);
-      setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
-    
-    // This logic runs when the user turns the toggle OFF
+    if (checked) {
+      // User turned notifications ON - show a green/standard toast
+      toast({
+        title: "Notifications Enabled",
+        description: "You will now receive reminders for your classes.",
+      });
     } else {
-      setNotificationsEnabled(false);
-      setDocumentNonBlocking(userRef, { notifications: false }, { merge: true });
+      // User turned notifications OFF - show a red/destructive toast
+      toast({
+        variant: "destructive",
+        title: "Notifications Disabled",
+        description: "You will no longer receive class reminders.",
+      });
     }
   };
   
