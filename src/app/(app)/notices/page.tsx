@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Card,
@@ -42,7 +43,7 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore, useCollection, addDocumentNonBlocking, setDocumentNonBlocking, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
+import { useFirestore, useCollection, addDocumentNonBlocking, setDocumentNonBlocking, useMemoFirebase, useUser, deleteDocumentNonBlocking, useDoc } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -73,6 +74,10 @@ type Notice = {
   pinned: boolean;
   tags: string[];
   attachments: string[];
+}
+
+type UserProfile = {
+    role?: 'student' | 'admin';
 }
 
 type NoticeStatus = 'Running' | 'Upcoming' | 'Completed';
@@ -238,6 +243,13 @@ export default function NoticesPage() {
   const firestore = useFirestore();
   const { user } = useUser();
 
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile } = useDoc<UserProfile>(userProfileRef);
+  const isAdmin = userProfile?.role === 'admin';
+
   const noticesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'notices'), orderBy('startDate', 'desc'));
@@ -296,7 +308,7 @@ export default function NoticesPage() {
 
 
   const NoticeCard = ({ notice }: { notice: Notice }) => {
-    const isAuthor = user && (user.uid === notice.authorId || !notice.authorId || notice.authorName === 'Campus Admin');
+    const isAuthor = user && (user.uid === notice.authorId);
     const status = getNoticeStatus(notice);
     const statusColor = {
         Running: 'bg-green-500/20 text-green-500',
@@ -325,7 +337,7 @@ export default function NoticesPage() {
               <Badge variant="secondary" className={cn("font-semibold", statusColor[status])}>
                 {status}
               </Badge>
-              {isAuthor && (
+              {isAdmin && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="h-6 w-6">
@@ -378,9 +390,11 @@ export default function NoticesPage() {
     <div className="p-4 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-primary font-headline">Notices</h1>
-        <Button onClick={handleAddNew} className="shadow-md">
-            <Plus className="h-4 w-4 mr-2" /> Add Notice
-        </Button>
+        {isAdmin && (
+            <Button onClick={handleAddNew} className="shadow-md">
+                <Plus className="h-4 w-4 mr-2" /> Add Notice
+            </Button>
+        )}
       </div>
       
       {isLoading && <p>Loading notices...</p>}
@@ -426,5 +440,3 @@ export default function NoticesPage() {
     </div>
   );
 }
-
-    

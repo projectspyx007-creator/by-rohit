@@ -3,39 +3,57 @@
  *
  * Core Philosophy:
  * This ruleset enforces a user-ownership model for private data (timetables, chat messages, notifications)
- * and a public-read, owner-write model for notices. User data is protected, and only authenticated users can
- * create content, with ownership validated on creation.
+ * and an admin-only write model for public notices. User data is protected, and only authenticated users can
+ * read content, with write access being role-based.
  *
  * Data Structure:
  * - /users/{userId}: Stores user profiles, accessible only to the owner.
- * - /notices/{noticeId}: Stores public notices, readable by all, but writable only by the author.
+ * - /notices/{noticeId}: Stores public notices, readable by all, but writable only by admins.
  * - /timetables/{userId}: Stores user timetables, accessible only to the owner.
  * - /chat_conversations/{userId}: Stores chat messages, accessible only to the owner.
  * - /users/{userId}/notifications/{notificationId}: Stores user notifications, accessible only to the owner.
  *
  * Key Security Decisions:
  * - User listing is disallowed.
- * - Roles are not yet implemented (future enhancement with DBAC).
+ * - Role-based access control (RBAC) is implemented for notices.
  * - Data shape validation is relaxed for rapid prototyping.
- *
- * Denormalization for Authorization:
- * - Notices store the authorId directly within the document, avoiding the need for `get()` calls during authorization.
- *
- * Structural Segregation:
- * - Private user data (timetables, chat messages, notifications) is stored under the /users/{userId} path,
- *   while public notices are stored in the top-level /notices collection. This ensures a clear separation
- *   of concerns and simplifies access control.
  */
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    /**
-     * @description Rules for all collections during testing.
-     * @principle Allow read and write access to any user for testing purposes.
-     */
-    match /{document=**} {
-      allow read, write: if true;
+    // Helper function to check if a user is an admin
+    function isAdmin(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role == 'admin';
+    }
+
+    // Users can only access their own profile data.
+    match /users/{userId} {
+      allow read, update, delete: if request.auth.uid == userId;
+      allow create: if request.auth.uid != null;
+    }
+
+    // Notices can be read by any authenticated user, but only created, updated, or deleted by an admin.
+    match /notices/{noticeId} {
+      allow read: if request.auth.uid != null;
+      allow create, update, delete: if isAdmin(request.auth.uid);
+    }
+    
+    // Timetables can only be accessed by their owner.
+    match /timetables/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // Chat conversations can only be accessed by their owner.
+    // Note: This rule applies to the collection. A subcollection for messages would need its own rules.
+    match /chat_conversations/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // Notifications are part of a user's subcollection and can only be accessed by the owner.
+    match /users/{userId}/notifications/{notificationId} {
+       allow read, write: if request.auth.uid == userId;
     }
   }
 }

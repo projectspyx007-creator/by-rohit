@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -27,12 +28,23 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
+type UserProfile = {
+    role?: 'student' | 'admin';
+}
+
 export default function NoticeDetailPage() {
   const params = useParams();
   const noticeId = params.id as string;
   const firestore = useFirestore();
   const { user } = useUser();
   const router = useRouter();
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+  const { data: userProfile } = useDoc<UserProfile>(userProfileRef);
+  const isAdmin = userProfile?.role === 'admin';
   
   const noticeRef = useMemoFirebase(() => {
     if (!firestore || !noticeId) return null;
@@ -76,7 +88,7 @@ export default function NoticeDetailPage() {
             Back to Notices
           </Link>
         </Button>
-        {isAuthor && (
+        {isAdmin && (
            <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
@@ -132,5 +144,3 @@ export default function NoticeDetailPage() {
     </div>
   );
 }
-
-    

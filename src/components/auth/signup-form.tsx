@@ -58,13 +58,17 @@ export function SignUpForm() {
     await updateProfile(user, { displayName: details.name });
 
     const userRef = doc(firestore, "users", user.uid);
+    
+    // Determine user role.
+    const userRole = details.email === 'ad24b1053@iiitr.ac.in' ? 'admin' : 'student';
+
     await setDocumentNonBlocking(userRef, {
       id: user.uid,
       name: details.name,
       email: details.email,
       rollNumber: details.rollNumber || "", 
       semester: details.semester || 1,
-      role: "student",
+      role: userRole,
       createdAt: new Date().toISOString(),
       notifications: true,
     }, { merge: true });
