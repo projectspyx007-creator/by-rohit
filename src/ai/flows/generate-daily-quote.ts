@@ -12,6 +12,7 @@ import {z} from 'genkit';
 
 const DailyQuoteOutputSchema = z.object({
   quote: z.string().describe('The motivational quote.'),
+  author: z.string().describe('The author of the quote.'),
 });
 export type DailyQuoteOutput = z.infer<typeof DailyQuoteOutputSchema>;
 
@@ -22,9 +23,9 @@ export async function generateDailyQuote(): Promise<DailyQuoteOutput> {
 const prompt = ai.definePrompt({
   name: 'dailyQuotePrompt',
   output: {schema: DailyQuoteOutputSchema},
-  prompt: `You are an AI that provides a short, insightful, and motivational quote.
+  prompt: `You are an AI that provides a short, insightful, and motivational quote from a great historical figure, scientist, leader, or artist.
   
-  Generate a new, concise, and engaging motivational quote suitable for a college student.
+  Generate a new, concise, and engaging motivational quote suitable for a college student, and provide the name of the person who said it.
   Do not repeat yourself. Provide a different response each time.`,
 });
 

@@ -9,6 +9,7 @@ import { useUser } from '@/firebase';
 
 type Quote = {
   quote: string;
+  author: string;
 }
 
 type Question = {
@@ -45,7 +46,7 @@ export default function HomePage() {
         setQuestion(questionResult);
       } catch (error) {
         console.error("Failed to fetch content:", error);
-        setQuote({ quote: "The best way to predict the future is to create it."});
+        setQuote({ quote: "The best way to predict the future is to create it.", author: "Abraham Lincoln" });
         setQuestion({ question: "What is the powerhouse of the cell?", category: 'engineering' });
       } finally {
         setIsLoading(false);
@@ -117,7 +118,7 @@ export default function HomePage() {
       ) : (
         <>
           {quote && (
-            <Card className="bg-background p-5 rounded-2xl shadow-md border-primary border-2">
+            <Card className="bg-card p-5 rounded-2xl shadow-md border-primary border-2">
               <CardContent className="p-0">
                 <div className="flex justify-between items-start mb-3">
                   <p className="text-sm font-bold font-headline tracking-wider uppercase text-primary">
@@ -128,11 +129,12 @@ export default function HomePage() {
                   <p className="italic text-lg text-foreground">
                     &ldquo;{quote.quote}&rdquo;
                   </p>
+                  <p className="text-right text-sm text-muted-foreground mt-2">&mdash; {quote.author}</p>
               </CardContent>
             </Card>
           )}
           {question && (
-             <Card className="bg-background p-5 rounded-2xl shadow-md border-primary/50 border-2">
+             <Card className="bg-card p-5 rounded-2xl shadow-md border-primary/50 border-2">
                 <CardContent className="p-0">
                     <div className="flex justify-between items-start mb-3">
                         <p className="text-sm font-bold font-headline tracking-wider uppercase text-primary">
@@ -140,7 +142,7 @@ export default function HomePage() {
                         </p>
                         <BrainCircuit className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-lg text-foreground">
+                    <p className="text-lg text-foreground font-code">
                         {question.question}
                     </p>
                     <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wider">{question.category}</p>

@@ -24,14 +24,14 @@ export async function generateHourlyQuestion(): Promise<HourlyQuestionOutput> {
 const prompt = ai.definePrompt({
   name: 'hourlyQuestionPrompt',
   output: {schema: HourlyQuestionOutputSchema},
-  prompt: `You are an AI that provides a simple, engaging educational question for a college student.
+  prompt: `You are an AI that provides a challenging and engaging educational question for a university-level engineering or computer science student.
   
   Randomly choose to generate one of the following:
-  1. A simple engineering question (e.g., "What is the difference between stress and strain?").
-  2. A simple coding question or a fun fact about programming (e.g., "What does API stand for?").
-  3. A simple math problem or a fun fact about mathematics (e.g., "What is the next number in the Fibonacci sequence: 0, 1, 1, 2, 3, 5, ...?").
+  1. A challenging engineering question (e.g., "Explain the principles of a cantilever beam and how to calculate its deflection under a point load.").
+  2. A difficult coding or algorithm problem (e.g., "Given an array of n non-negative integers representing an elevation map where the width of each bar is 1, compute how much rainwater it can trap after a rain.").
+  3. A complex math problem involving calculus, linear algebra, or discrete mathematics (e.g., "Find the eigenvalues and eigenvectors of the matrix A = [[4, 1], [2, 3]].").
   
-  Ensure the content is concise and engaging. Do not repeat yourself. Provide a different response each time.`,
+  Ensure the content is concise but challenging. Do not repeat yourself. Provide a different response each time.`,
 });
 
 const generateHourlyQuestionFlow = ai.defineFlow(
