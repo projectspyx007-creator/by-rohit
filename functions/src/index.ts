@@ -30,7 +30,7 @@ export const createNotificationOnNewNotice = functions.firestore
         const userId = userDoc.id;
         const userProfile = userDoc.data();
         
-        // Only send notification if user has them enabled
+        // Only send notification if user has them enabled in their profile
         if (userProfile.notifications === false) {
             return;
         }
