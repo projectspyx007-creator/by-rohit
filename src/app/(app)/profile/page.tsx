@@ -44,9 +44,8 @@ export default function ProfilePage() {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
-    // Correctly set the toggle state based on the user's profile setting from the database.
     if (userProfile) {
-      // The `notifications` field can be undefined for older users, default to true for the UI.
+      // The `notifications` field can be undefined for some users, default to true for the UI.
       setNotificationsEnabled(userProfile.notifications ?? true);
     }
   }, [userProfile]);
@@ -63,14 +62,18 @@ export default function ProfilePage() {
       return;
     }
 
+    // If turning notifications ON
     if (checked) {
       if (Notification.permission === 'granted') {
+        // Permission already granted, just update DB
         setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
         setNotificationsEnabled(true);
       } else if (Notification.permission !== 'denied') {
+        // Not denied, so we can ask
         const permission = await Notification.requestPermission();
         setNotificationPermission(permission);
         if (permission === 'granted') {
+          // Permission was just granted
           setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
           setNotificationsEnabled(true);
           toast({
@@ -78,22 +81,25 @@ export default function ProfilePage() {
             description: "You will now receive reminders for your classes.",
           });
         } else {
+          // Permission was denied
           toast({
             variant: "destructive",
             title: "Notifications Blocked",
             description: "Please enable notifications in your browser settings.",
           });
-          setNotificationsEnabled(false);
+          setNotificationsEnabled(false); // Keep toggle off
         }
       } else {
+        // Permission was already denied
         toast({
           variant: "destructive",
           title: "Notifications are Blocked",
           description: "You need to manually enable notifications for this site in your browser settings.",
         });
-        setNotificationsEnabled(false);
+        setNotificationsEnabled(false); // Ensure toggle is off
       }
     } else {
+      // If turning notifications OFF
       setDocumentNonBlocking(userRef, { notifications: false }, { merge: true });
       setNotificationsEnabled(false);
     }
@@ -101,7 +107,9 @@ export default function ProfilePage() {
   
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      if (auth) {
+        await signOut(auth);
+      }
       router.push('/signin');
     } catch (error) {
       console.error("Error signing out: ", error);
@@ -185,7 +193,7 @@ export default function ProfilePage() {
             <Switch 
               checked={notificationsEnabled}
               onCheckedChange={handleNotificationToggle}
-              disabled={notificationPermission === 'denied' || isProfileLoading}
+              disabled={isProfileLoading}
             />
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
