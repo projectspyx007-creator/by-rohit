@@ -73,6 +73,10 @@
           "type": "string",
           "description": "Reference to User. (Relationship: User 1:N Notice)"
         },
+        "authorName": {
+          "type": "string",
+          "description": "Denormalized name of the author for easy display."
+        },
         "tags": {
           "type": "array",
           "description": "Keywords or categories associated with the notice.",
@@ -107,6 +111,7 @@
         "title",
         "body",
         "authorId",
+        "authorName",
         "createdAt"
       ]
     },
@@ -358,6 +363,6 @@
         }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to support the 'Coffee Campus' application, focusing on user authentication, real-time notices, personalized timetables, an AI-powered Coffee Coach, and profile management. The structure adheres to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters).\n\n**Authorization Independence (Denormalization):**\n\n*   **Notices:** The `authorId` is stored within each notice, allowing rules to verify ownership without needing to `get()` the user document. This is crucial for atomic operations and avoids hierarchical authorization dependencies.\n*   **Timetables, Chat Conversations, and Notifications:** These are all subcollections of `/users/{userId}`, ensuring that only the authenticated user has access. This path-based ownership eliminates the need for `get()` calls to determine authorization.\n\n**Structural Segregation (Homogeneous Security Posture):**\n\n*   Each collection (e.g., `/notices`, `/timetables`, `/chat_conversations`) contains documents with similar security requirements. This simplifies the rules and avoids mixing data with different access needs within the same collection.\n\n**Access Modeling (Standardization and Consistency):**\n\n*   **Private Data:** Timetables, Chat Conversations, and Notifications are located under `/users/{userId}`, implementing path-based ownership for user-specific data.\n*   **Global Roles (DBAC):** While the provided rules use custom claims (`request.auth.token.role`), the recommendation is to store roles in the database (e.g., a dedicated `/roles_admin/{uid}` collection) and check for existence, following the Existence over Content principle.\n\n**QAPs (Rules are not Filters):**\n\n*   The segregation of data into collections with homogeneous security postures (e.g., all documents in `/notices` have the same read access rules) ensures that list operations can be performed securely without the rules acting as filters.  For example, any user can list all `/notices` because the read rule allows it. Admin/Editor access is controlled for `create`, `update`, and `delete` based on role (which, ideally, should be stored in the database as suggested above for true DBAC)."
+    "reasoning": "The Firestore data structure is designed to support the 'Coffee Campus' application, focusing on user authentication, real-time notices, personalized timetables, an AI-powered Coffee Coach, and profile management. The structure adheres to the principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters).\n\n**Authorization Independence (Denormalization):**\n\n*   **Notices:** The `authorId` and `authorName` are stored within each notice, allowing rules to verify ownership and display names without needing to `get()` the user document. This is crucial for atomic operations and avoids hierarchical authorization dependencies.\n*   **Timetables, Chat Conversations, and Notifications:** These are all subcollections of `/users/{userId}`, ensuring that only the authenticated user has access. This path-based ownership eliminates the need for `get()` calls to determine authorization.\n\n**Structural Segregation (Homogeneous Security Posture):**\n\n*   Each collection (e.g., `/notices`, `/timetables`, `/chat_conversations`) contains documents with similar security requirements. This simplifies the rules and avoids mixing data with different access needs within the same collection.\n\n**Access Modeling (Standardization and Consistency):**\n\n*   **Private Data:** Timetables, Chat Conversations, and Notifications are located under `/users/{userId}`, implementing path-based ownership for user-specific data.\n*   **Global Roles (DBAC):** While the provided rules use custom claims (`request.auth.token.role`), the recommendation is to store roles in the database (e.g., a dedicated `/roles_admin/{uid}` collection) and check for existence, following the Existence over Content principle.\n\n**QAPs (Rules are not Filters):**\n\n*   The segregation of data into collections with homogeneous security postures (e.g., all documents in `/notices` have the same read access rules) ensures that list operations can be performed securely without the rules acting as filters.  For example, any user can list all `/notices` because the read rule allows it. Admin/Editor access is controlled for `create`, `update`, and `delete` based on role (which, ideally, should be stored in the database as suggested above for true DBAC)."
   }
 }

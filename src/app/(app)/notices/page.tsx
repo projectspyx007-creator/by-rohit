@@ -56,7 +56,7 @@ function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => vo
     addDocumentNonBlocking(noticesCollection, {
       title: values.title,
       body: values.content,
-      author: user.displayName || 'Anonymous',
+      authorName: user.displayName || 'Anonymous',
       authorId: user.uid,
       createdAt: new Date().toISOString(),
       pinned: false,
@@ -145,7 +145,7 @@ export default function NoticesPage() {
               </Badge>
             </div>
             <CardDescription>
-              By {notice.author} on {format(new Date(notice.createdAt), 'PPP')}
+              By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -166,7 +166,7 @@ export default function NoticesPage() {
                 </CardTitle>
               </Link>
             <CardDescription>
-              By {notice.author} on {format(new Date(notice.createdAt), 'PPP')}
+              By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
             </CardDescription>
           </CardHeader>
           <CardContent>
