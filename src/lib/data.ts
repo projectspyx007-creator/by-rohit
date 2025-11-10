@@ -17,22 +17,6 @@ export const mockNotices: Notice[] = [
     content: "<p>Welcome to the new semester! Grab a virtual coffee and explore the app. ☕</p>"
   },
   {
-    id: "2",
-    title: "Mid-term Exam Schedule",
-    author: "Exam Department",
-    date: "2024-07-27",
-    pinned: false,
-    content: "<p>The mid-term exam schedule for all departments has been published. Please check the university website for details.</p>"
-  },
-  {
-    id: "3",
-    title: "Annual Sports Day Registration",
-    author: "Sports Committee",
-    date: "2024-07-26",
-    pinned: false,
-    content: "<p>Registrations for the annual sports day are now open. Last date to register is August 5th.</p>"
-  },
-  {
     id: "4",
     title: "Library Maintenance",
     author: "Library Staff",
