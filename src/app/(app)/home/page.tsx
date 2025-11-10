@@ -85,31 +85,31 @@ export default function HomePage() {
 
       {isLoading ? (
         <>
-          <Card className="bg-primary text-primary-foreground p-5 rounded-2xl shadow-md border-none">
+          <Card className="bg-background p-5 rounded-2xl shadow-md border-primary border-2">
             <CardContent className="p-0">
               <div className="flex justify-between items-start mb-3">
                 <p className="text-sm font-bold font-headline tracking-wider uppercase">
                   Quote of the Day
                 </p>
-                <Lightbulb className="h-6 w-6 text-cream/80" />
+                <Lightbulb className="h-6 w-6 text-primary" />
               </div>
               <div className="space-y-2">
-                  <div className="w-full h-4 bg-cream/20 rounded-full animate-pulse"></div>
-                  <div className="w-3/4 h-4 bg-cream/20 rounded-full animate-pulse"></div>
+                  <div className="w-full h-4 bg-muted rounded-full animate-pulse"></div>
+                  <div className="w-3/4 h-4 bg-muted rounded-full animate-pulse"></div>
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-secondary text-secondary-foreground p-5 rounded-2xl shadow-md border-none">
+          <Card className="bg-background p-5 rounded-2xl shadow-md border-primary/50 border-2">
             <CardContent className="p-0">
               <div className="flex justify-between items-start mb-3">
                 <p className="text-sm font-bold font-headline tracking-wider uppercase">
                   Question of the Hour
                 </p>
-                <BrainCircuit className="h-6 w-6 text-cream/80" />
+                <BrainCircuit className="h-6 w-6 text-primary" />
               </div>
               <div className="space-y-2">
-                  <div className="w-full h-4 bg-cream/20 rounded-full animate-pulse"></div>
-                  <div className="w-3/4 h-4 bg-cream/20 rounded-full animate-pulse"></div>
+                  <div className="w-full h-4 bg-muted rounded-full animate-pulse"></div>
+                  <div className="w-3/4 h-4 bg-muted rounded-full animate-pulse"></div>
               </div>
             </CardContent>
           </Card>
@@ -117,33 +117,33 @@ export default function HomePage() {
       ) : (
         <>
           {quote && (
-            <Card className="bg-primary text-primary-foreground p-5 rounded-2xl shadow-md border-none">
+            <Card className="bg-background p-5 rounded-2xl shadow-md border-primary border-2">
               <CardContent className="p-0">
                 <div className="flex justify-between items-start mb-3">
-                  <p className="text-sm font-bold font-headline tracking-wider uppercase">
+                  <p className="text-sm font-bold font-headline tracking-wider uppercase text-primary">
                     Quote of the Day
                   </p>
-                  <Lightbulb className="h-6 w-6 text-cream/80" />
+                  <Lightbulb className="h-6 w-6 text-primary" />
                 </div>
-                  <p className="italic text-lg text-cream">
+                  <p className="italic text-lg text-foreground">
                     &ldquo;{quote.quote}&rdquo;
                   </p>
               </CardContent>
             </Card>
           )}
           {question && (
-             <Card className="bg-accent text-accent-foreground p-5 rounded-2xl shadow-md border-none">
+             <Card className="bg-background p-5 rounded-2xl shadow-md border-primary/50 border-2">
                 <CardContent className="p-0">
                     <div className="flex justify-between items-start mb-3">
-                        <p className="text-sm font-bold font-headline tracking-wider uppercase">
+                        <p className="text-sm font-bold font-headline tracking-wider uppercase text-primary">
                         Question of the Hour
                         </p>
-                        <BrainCircuit className="h-6 w-6 text-cream/80" />
+                        <BrainCircuit className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-lg text-cream">
+                    <p className="text-lg text-foreground">
                         {question.question}
                     </p>
-                    <p className="text-xs text-cream/70 mt-2 uppercase tracking-wider">{question.category}</p>
+                    <p className="text-xs text-muted-foreground mt-2 uppercase tracking-wider">{question.category}</p>
                 </CardContent>
             </Card>
           )}
