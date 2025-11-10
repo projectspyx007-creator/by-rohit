@@ -9,11 +9,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Pin, Trash2 } from 'lucide-react';
+import { Pin, Trash2, ArrowLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
 import { useDoc, useFirestore, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import {
@@ -117,10 +116,15 @@ export default function NoticeDetailPage() {
           <CardDescription>
             By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
           </CardDescription>
+          {notice.startDate && notice.endDate && (
+             <CardDescription className="text-xs pt-2">
+                Active from {format(new Date(notice.startDate), 'PPP')} to {format(new Date(notice.endDate), 'PPP')}
+            </CardDescription>
+          )}
         </CardHeader>
         <CardContent>
           <div
-            className="prose text-foreground"
+            className="prose dark:prose-invert text-foreground"
             dangerouslySetInnerHTML={{ __html: notice.body }}
           />
         </CardContent>
@@ -128,3 +132,5 @@ export default function NoticeDetailPage() {
     </div>
   );
 }
+
+    

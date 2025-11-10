@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import {
   Card,
@@ -12,14 +12,13 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pin, Plus, MoreVertical, Trash2, Pencil } from 'lucide-react';
-import { format } from 'date-fns';
+import { Pin, Plus, MoreVertical, Trash2, Pencil, Calendar as CalendarIcon } from 'lucide-react';
+import { format, isBefore, isAfter } from 'date-fns';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   DropdownMenu,
@@ -46,11 +45,20 @@ import { z } from 'zod';
 import { useFirestore, useCollection, addDocumentNonBlocking, setDocumentNonBlocking, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
 import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
 
 const noticeSchema = z.object({
   title: z.string().min(1, { message: 'Title is required.' }),
   content: z.string().min(1, { message: 'Content is required.' }),
+  startDate: z.date({ required_error: "A start date is required." }),
+  endDate: z.date({ required_error: "An end date is required." }),
+}).refine(data => data.endDate > data.startDate, {
+  message: "End date must be after start date.",
+  path: ["endDate"],
 });
+
 
 // Notice type based on our data structure
 type Notice = {
@@ -60,10 +68,15 @@ type Notice = {
   authorName: string;
   authorId?: string;
   createdAt: string;
+  startDate: string;
+  endDate: string;
   pinned: boolean;
   tags: string[];
   attachments: string[];
 }
+
+type NoticeStatus = 'Running' | 'Upcoming' | 'Completed';
+
 
 function NoticeForm({ setDialogOpen, noticeToEdit }: { setDialogOpen: (open: boolean) => void, noticeToEdit?: Notice | null }) {
   const firestore = useFirestore();
@@ -74,25 +87,30 @@ function NoticeForm({ setDialogOpen, noticeToEdit }: { setDialogOpen: (open: boo
     defaultValues: {
       title: noticeToEdit?.title || '',
       content: noticeToEdit?.body || '',
+      startDate: noticeToEdit ? new Date(noticeToEdit.startDate) : new Date(),
+      endDate: noticeToEdit ? new Date(noticeToEdit.endDate) : new Date(new Date().setDate(new Date().getDate() + 1)),
     },
   });
 
   const onSubmit = async (values: z.infer<typeof noticeSchema>) => {
     if (!firestore || !user) return;
 
+    const noticeData = {
+      title: values.title,
+      body: values.content,
+      startDate: values.startDate.toISOString(),
+      endDate: values.endDate.toISOString(),
+    };
+
     if (noticeToEdit) {
       // Update existing notice
       const noticeRef = doc(firestore, 'notices', noticeToEdit.id);
-      setDocumentNonBlocking(noticeRef, {
-        title: values.title,
-        body: values.content,
-      }, { merge: true });
+      setDocumentNonBlocking(noticeRef, noticeData, { merge: true });
     } else {
       // Create new notice
       const noticesCollection = collection(firestore, 'notices');
       addDocumentNonBlocking(noticesCollection, {
-        title: values.title,
-        body: values.content,
+        ...noticeData,
         authorName: user.displayName || 'Anonymous',
         authorId: user.uid,
         createdAt: new Date().toISOString(),
@@ -135,6 +153,76 @@ function NoticeForm({ setDialogOpen, noticeToEdit }: { setDialogOpen: (open: boo
             </FormItem>
           )}
         />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="startDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="endDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "w-full pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
           {form.formState.isSubmitting 
             ? (noticeToEdit ? 'Saving...' : 'Adding...')
@@ -152,7 +240,7 @@ export default function NoticesPage() {
 
   const noticesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return query(collection(firestore, 'notices'), orderBy('createdAt', 'desc'));
+    return query(collection(firestore, 'notices'), orderBy('startDate', 'desc'));
   }, [firestore]);
 
   const { data: notices, isLoading } = useCollection<Notice>(noticesQuery);
@@ -183,14 +271,38 @@ export default function NoticesPage() {
     setEditingNotice(null);
     setIsDialogOpen(true);
   }
-  
-  const filteredNotices = notices?.filter(notice => notice.title !== 'mid sem exam' && notice.title !== 'dgs');
 
-  const pinnedNotices = filteredNotices?.filter((n) => n.pinned) || [];
-  const otherNotices = filteredNotices?.filter((n) => !n.pinned) || [];
+  const getNoticeStatus = (notice: Notice): NoticeStatus => {
+    const now = new Date();
+    const startDate = new Date(notice.startDate);
+    const endDate = new Date(notice.endDate);
+    
+    if (isBefore(now, startDate)) return 'Upcoming';
+    if (isAfter(now, endDate)) return 'Completed';
+    return 'Running';
+  };
+  
+  const categorizedNotices = useMemo(() => {
+    if (!notices) return { running: [], upcoming: [], completed: [] };
+
+    return notices.reduce((acc, notice) => {
+        const status = getNoticeStatus(notice);
+        if (status === 'Running') acc.running.push(notice);
+        else if (status === 'Upcoming') acc.upcoming.push(notice);
+        else acc.completed.push(notice);
+        return acc;
+    }, { running: [] as Notice[], upcoming: [] as Notice[], completed: [] as Notice[] });
+  }, [notices]);
+
 
   const NoticeCard = ({ notice }: { notice: Notice }) => {
     const isAuthor = user && (user.uid === notice.authorId || !notice.authorId || notice.authorName === 'Campus Admin');
+    const status = getNoticeStatus(notice);
+    const statusColor = {
+        Running: 'bg-green-500/20 text-green-500',
+        Upcoming: 'bg-yellow-500/20 text-yellow-500',
+        Completed: 'bg-red-500/20 text-red-500',
+    };
 
     return (
       <Card
@@ -209,16 +321,10 @@ export default function NoticesPage() {
                 By {notice.authorName || 'Campus Admin'} on {format(new Date(notice.createdAt), 'PPP')}
               </CardDescription>
             </div>
-            <div className="flex items-center gap-1">
-              {notice.pinned && (
-                <Badge
-                  variant="secondary"
-                  className="bg-accent/30 text-accent-foreground flex items-center gap-1"
-                >
-                  <Pin className="h-3 w-3" />
-                  Pinned
-                </Badge>
-              )}
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className={cn("font-semibold", statusColor[status])}>
+                {status}
+              </Badge>
               {isAuthor && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -243,7 +349,7 @@ export default function NoticesPage() {
           <div className="prose prose-sm text-foreground max-h-20 overflow-hidden relative">
             <div dangerouslySetInnerHTML={{ __html: notice.body }} />
             {notice.body.length > 200 && (
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent" />
             )}
           </div>
         </CardContent>
@@ -256,30 +362,40 @@ export default function NoticesPage() {
     );
   }
 
+  const NoticeSection = ({ title, notices }: { title: string, notices: Notice[] }) => {
+    if (notices.length === 0) return null;
+    return (
+        <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-muted-foreground font-headline tracking-wide">{title}</h2>
+            {notices.map((notice) => (
+                <NoticeCard key={notice.id} notice={notice} />
+            ))}
+        </div>
+    );
+  };
+
   return (
-    <div className="p-4 space-y-4">
-      <h1 className="text-2xl font-bold text-primary font-headline">Notices</h1>
+    <div className="p-4 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-primary font-headline">Notices</h1>
+        <Button onClick={handleAddNew} className="shadow-md">
+            <Plus className="h-4 w-4 mr-2" /> Add Notice
+        </Button>
+      </div>
       
       {isLoading && <p>Loading notices...</p>}
 
-      {pinnedNotices.map((notice) => (
-        <NoticeCard key={notice.id} notice={notice} />
-      ))}
-
-      {otherNotices.map((notice) => (
-        <NoticeCard key={notice.id} notice={notice} />
-      ))}
+      <div className="space-y-8">
+        <NoticeSection title="Running" notices={categorizedNotices.running} />
+        <NoticeSection title="Upcoming" notices={categorizedNotices.upcoming} />
+        <NoticeSection title="Completed" notices={categorizedNotices.completed} />
+      </div>
       
-      {(filteredNotices?.length || 0) === 0 && !isLoading && (
+      {!notices?.length && !isLoading && (
         <div className="text-center py-10">
           <p className="text-muted-foreground">No notices yet.</p>
         </div>
       )}
-
-      <Button onClick={handleAddNew} className="fixed bottom-20 right-4 h-14 w-14 rounded-full shadow-lg">
-        <Plus className="h-6 w-6" />
-        <span className="sr-only">Add Notice</span>
-      </Button>
 
       <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
@@ -310,3 +426,5 @@ export default function NoticesPage() {
     </div>
   );
 }
+
+    
