@@ -31,7 +31,7 @@ export const createNotificationOnNewNotice = functions.firestore
         const userProfile = userDoc.data();
         
         // Only send notification if user has them enabled in their profile
-        // This now correctly handles cases where 'notifications' might be undefined
+        // This now correctly handles cases where 'notifications' might be undefined or true
         if (userProfile.notifications === false) {
             functions.logger.log(`Skipping notification for user ${userId} because they have disabled them.`);
             return;
@@ -48,7 +48,7 @@ export const createNotificationOnNewNotice = functions.firestore
           type: "new_notice",
           title: `New Notice: ${noticeTitle}`,
           read: false,
-          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          createdAt: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp for reliability
           relatedEntityId: context.params.noticeId, // Link to the notice
         });
       });
