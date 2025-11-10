@@ -12,7 +12,7 @@ export default function AppLayout({
     <AuthGuard>
       <div className="flex h-screen w-full flex-col">
         <Header />
-        <main className="flex-1 overflow-y-auto pt-14 pb-16 bg-cream">
+        <main className="flex-1 overflow-y-auto pt-14 pb-16 bg-background">
           {children}
         </main>
         <BottomNav />
