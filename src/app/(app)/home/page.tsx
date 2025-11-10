@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -17,6 +18,11 @@ type Question = {
   category: 'engineering' | 'coding' | 'math';
 }
 
+type CachedData<T> = {
+  data: T;
+  timestamp: number;
+};
+
 export default function HomePage() {
   const { user } = useUser();
   const userName = user?.displayName?.split(' ')[0] || "Friend";
@@ -35,36 +41,63 @@ export default function HomePage() {
       setGreeting("Good Evening");
     }
 
-    async function fetchContent() {
+    // Wrap async logic in a function
+    const fetchAndCacheContent = async () => {
+      setIsLoading(true);
       try {
-        setIsLoading(true);
-        const [quoteResult, questionResult] = await Promise.all([
-          generateDailyQuote(),
-          generateHourlyQuestion()
-        ]);
-        setQuote(quoteResult);
-        setQuestion(questionResult);
+        // --- Quote Logic ---
+        const cachedQuoteItem = localStorage.getItem('dailyQuote');
+        let quoteData: Quote | null = null;
+        if (cachedQuoteItem) {
+          const cachedQuote: CachedData<Quote> = JSON.parse(cachedQuoteItem);
+          const isStale = (new Date().getTime() - cachedQuote.timestamp) > 24 * 60 * 60 * 1000; // 24 hours
+          if (!isStale) {
+            quoteData = cachedQuote.data;
+          }
+        }
+        if (!quoteData) {
+          quoteData = await generateDailyQuote();
+          localStorage.setItem('dailyQuote', JSON.stringify({ data: quoteData, timestamp: new Date().getTime() }));
+        }
+        setQuote(quoteData);
+
+        // --- Question Logic ---
+        const cachedQuestionItem = localStorage.getItem('hourlyQuestion');
+        let questionData: Question | null = null;
+        if (cachedQuestionItem) {
+          const cachedQuestion: CachedData<Question> = JSON.parse(cachedQuestionItem);
+          const isStale = (new Date().getTime() - cachedQuestion.timestamp) > 60 * 60 * 1000; // 1 hour
+          if (!isStale) {
+            questionData = cachedQuestion.data;
+          }
+        }
+        if (!questionData) {
+          questionData = await generateHourlyQuestion();
+          localStorage.setItem('hourlyQuestion', JSON.stringify({ data: questionData, timestamp: new Date().getTime() }));
+        }
+        setQuestion(questionData);
+
       } catch (error) {
         console.error("Failed to fetch content:", error);
-        // Fallback content in case of AI failure
         setQuote({ quote: "The best way to predict the future is to create it.", author: "Abraham Lincoln" });
         setQuestion({ question: "Explain the difference between a mutex and a semaphore.", category: 'coding' });
       } finally {
         setIsLoading(false);
       }
-    }
-
-    fetchContent();
+    };
+    
+    fetchAndCacheContent();
     
     // Set an interval to fetch a new question every hour
     const intervalId = setInterval(async () => {
         try {
-            const questionResult = await generateHourlyQuestion();
-            setQuestion(questionResult);
+            const newQuestion = await generateHourlyQuestion();
+            setQuestion(newQuestion);
+            localStorage.setItem('hourlyQuestion', JSON.stringify({ data: newQuestion, timestamp: new Date().getTime() }));
         } catch (error) {
             console.error("Failed to fetch hourly question:", error);
         }
-    }, 3600000);
+    }, 3600000); // 1 hour
 
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
