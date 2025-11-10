@@ -188,8 +188,8 @@ export default function NoticesPage() {
   const otherNotices = notices?.filter((n) => !n.pinned) || [];
 
   const NoticeCard = ({ notice }: { notice: Notice }) => {
-    // Show actions if user is the author OR if authorId is missing (for legacy notices)
-    const isAuthor = user && (!notice.authorId || user.uid === notice.authorId);
+    // Show actions if user is the author OR if authorId is missing OR if author is 'Campus Admin'
+    const isAuthor = user && (user.uid === notice.authorId || !notice.authorId || notice.authorName === 'Campus Admin');
 
     return (
       <Card
