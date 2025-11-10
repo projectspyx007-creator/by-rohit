@@ -37,71 +37,37 @@ export default function ProfilePage() {
   }, [firestore, user]);
   
   const { data: userProfile, isLoading: isProfileLoading } = useDoc(userRef);
-  const [notificationPermission, setNotificationPermission] = useState('default');
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationPermission(Notification.permission);
-    }
     if (userProfile) {
-      // The `notifications` field can be undefined for some users, default to true for the UI.
+      // The `notifications` field can be undefined, default to true for the UI.
       setNotificationsEnabled(userProfile.notifications ?? true);
     }
   }, [userProfile]);
 
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
+    
+    // Simply update the state and the database value.
+    setNotificationsEnabled(checked);
+    setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
 
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      toast({
-        variant: "destructive",
-        title: "Unsupported Browser",
-        description: "Your browser does not support notifications.",
-      });
-      return;
-    }
-
-    // If turning notifications ON
+    // Inform the user about browser permissions if they are turning notifications on.
     if (checked) {
-      if (Notification.permission === 'granted') {
-        // Permission already granted, just update DB
-        setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
-        setNotificationsEnabled(true);
-      } else if (Notification.permission !== 'denied') {
-        // Not denied, so we can ask
-        const permission = await Notification.requestPermission();
-        setNotificationPermission(permission);
-        if (permission === 'granted') {
-          // Permission was just granted
-          setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
-          setNotificationsEnabled(true);
-          toast({
-            title: "Notifications Enabled",
-            description: "You will now receive reminders for your classes.",
-          });
-        } else {
-          // Permission was denied
-          toast({
-            variant: "destructive",
-            title: "Notifications Blocked",
-            description: "Please enable notifications in your browser settings.",
-          });
-          setNotificationsEnabled(false); // Keep toggle off
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'denied') {
+                toast({
+                    variant: "destructive",
+                    title: "Notifications are Blocked",
+                    description: "To receive alerts, you need to manually enable notifications for this site in your browser settings.",
+                });
+            } else if (Notification.permission === 'default') {
+                // The scheduler component will ask for permission when it first tries to schedule a notification.
+                // We can also ask here if desired.
+                 Notification.requestPermission();
+            }
         }
-      } else {
-        // Permission was already denied
-        toast({
-          variant: "destructive",
-          title: "Notifications are Blocked",
-          description: "You need to manually enable notifications for this site in your browser settings.",
-        });
-        setNotificationsEnabled(false); // Ensure toggle is off
-      }
-    } else {
-      // If turning notifications OFF
-      setDocumentNonBlocking(userRef, { notifications: false }, { merge: true });
-      setNotificationsEnabled(false);
     }
   };
   
