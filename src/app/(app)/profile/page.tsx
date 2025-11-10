@@ -40,34 +40,42 @@ export default function ProfilePage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   useEffect(() => {
+    // Only set the initial state from the database profile.
     if (userProfile) {
-      // The `notifications` field can be undefined, default to true for the UI.
-      setNotificationsEnabled(userProfile.notifications ?? true);
+      setNotificationsEnabled(userProfile.notifications ?? false);
     }
   }, [userProfile]);
 
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
-    
-    // This is the simplified logic. It ONLY updates the database preference.
-    setNotificationsEnabled(checked);
-    setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
 
-    // New, simplified logic for user feedback.
     if (checked) {
-        if (typeof window !== 'undefined' && 'Notification' in window) {
-            // If permission is already denied, inform the user they need to act.
-            if (Notification.permission === 'denied') {
-                toast({
-                    variant: "destructive",
-                    title: "Notifications are Blocked",
-                    description: "To receive alerts, please enable notifications for this site in your browser settings.",
-                });
-            // If permission hasn't been asked, request it now.
-            } else if (Notification.permission === 'default') {
-                 Notification.requestPermission();
-            }
+      // Logic for TURNING ON the toggle
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        if (Notification.permission === 'denied') {
+          // If permissions are already denied, show the toast and do NOT change the toggle state.
+          toast({
+            variant: "destructive",
+            title: "Notifications are Blocked",
+            description: "To receive alerts, please enable notifications for this site in your browser settings.",
+          });
+          // Do not update the state or database. The switch remains off.
+          setNotificationsEnabled(false);
+          return;
+        } else if (Notification.permission === 'default') {
+          // If we need to ask, we ask. The user's choice will be handled by the browser.
+          await Notification.requestPermission();
         }
+      }
+      // If we get here, permission is 'granted' or 'default', so we proceed.
+      // Update UI and Database
+      setNotificationsEnabled(true);
+      setDocumentNonBlocking(userRef, { notifications: true }, { merge: true });
+
+    } else {
+      // Logic for TURNING OFF the toggle - just update UI and DB.
+      setNotificationsEnabled(false);
+      setDocumentNonBlocking(userRef, { notifications: false }, { merge: true });
     }
   };
   
