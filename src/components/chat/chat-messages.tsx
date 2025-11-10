@@ -1,7 +1,6 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { Message } from "./chat-view";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Icons } from "../icons";
 
 type ChatMessagesProps = {
@@ -10,8 +9,6 @@ type ChatMessagesProps = {
 };
 
 export function ChatMessages({ messages, isPending }: ChatMessagesProps) {
-  const userAvatar = PlaceHolderImages.find(img => img.id === 'user-avatar');
-
   return (
     <>
       {messages.map((message) => (
@@ -40,13 +37,6 @@ export function ChatMessages({ messages, isPending }: ChatMessagesProps) {
           >
             <p className="text-sm">{message.text}</p>
           </div>
-
-          {message.role === "user" && (
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={userAvatar?.imageUrl} data-ai-hint={userAvatar?.imageHint} />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-          )}
         </div>
       ))}
       {isPending && (
