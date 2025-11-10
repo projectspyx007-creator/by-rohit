@@ -49,22 +49,22 @@ export default function ProfilePage() {
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
     
-    // Simply update the state and the database value.
+    // This is the simplified logic. It ONLY updates the database preference.
     setNotificationsEnabled(checked);
     setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
 
-    // Inform the user about browser permissions if they are turning notifications on.
+    // New, simplified logic for user feedback.
     if (checked) {
         if (typeof window !== 'undefined' && 'Notification' in window) {
+            // If permission is already denied, inform the user they need to act.
             if (Notification.permission === 'denied') {
                 toast({
                     variant: "destructive",
                     title: "Notifications are Blocked",
-                    description: "To receive alerts, you need to manually enable notifications for this site in your browser settings.",
+                    description: "To receive alerts, please enable notifications for this site in your browser settings.",
                 });
+            // If permission hasn't been asked, request it now.
             } else if (Notification.permission === 'default') {
-                // The scheduler component will ask for permission when it first tries to schedule a notification.
-                // We can also ask here if desired.
                  Notification.requestPermission();
             }
         }
@@ -159,7 +159,6 @@ export default function ProfilePage() {
             <Switch 
               checked={notificationsEnabled}
               onCheckedChange={handleNotificationToggle}
-              disabled={isProfileLoading}
             />
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">
