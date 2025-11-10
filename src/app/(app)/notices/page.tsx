@@ -183,12 +183,13 @@ export default function NoticesPage() {
     setEditingNotice(null);
     setIsDialogOpen(true);
   }
+  
+  const filteredNotices = notices?.filter(notice => notice.title !== 'mid sem exam' && notice.title !== 'dgs');
 
-  const pinnedNotices = notices?.filter((n) => n.pinned) || [];
-  const otherNotices = notices?.filter((n) => !n.pinned) || [];
+  const pinnedNotices = filteredNotices?.filter((n) => n.pinned) || [];
+  const otherNotices = filteredNotices?.filter((n) => !n.pinned) || [];
 
   const NoticeCard = ({ notice }: { notice: Notice }) => {
-    // Show actions if user is the author OR if authorId is missing OR if author is 'Campus Admin'
     const isAuthor = user && (user.uid === notice.authorId || !notice.authorId || notice.authorName === 'Campus Admin');
 
     return (
@@ -269,7 +270,7 @@ export default function NoticesPage() {
         <NoticeCard key={notice.id} notice={notice} />
       ))}
       
-      {(notices?.length || 0) === 0 && !isLoading && (
+      {(filteredNotices?.length || 0) === 0 && !isLoading && (
         <div className="text-center py-10">
           <p className="text-muted-foreground">No notices yet.</p>
         </div>
