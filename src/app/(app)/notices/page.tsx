@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pin, Plus } from 'lucide-react';
+import { Pin, Plus, MoreVertical, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import {
   Dialog,
@@ -21,14 +21,30 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useFirestore, useCollection, addDocumentNonBlocking, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { useFirestore, useCollection, addDocumentNonBlocking, useMemoFirebase, useUser, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
 const noticeSchema = z.object({
@@ -107,6 +123,8 @@ function NewNoticeForm({ setDialogOpen }: { setDialogOpen: (open: boolean) => vo
 
 export default function NoticesPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
+
   const noticesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'notices'), orderBy('createdAt', 'desc'));
@@ -114,9 +132,88 @@ export default function NoticesPage() {
 
   const { data: notices, isLoading } = useCollection(noticesQuery);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [selectedNoticeId, setSelectedNoticeId] = useState<string | null>(null);
+
+  const handleDelete = () => {
+    if (!firestore || !selectedNoticeId) return;
+    const noticeRef = doc(firestore, 'notices', selectedNoticeId);
+    deleteDocumentNonBlocking(noticeRef);
+    setIsAlertOpen(false);
+    setSelectedNoticeId(null);
+  };
+  
+  const openDeleteConfirm = (noticeId: string) => {
+    setSelectedNoticeId(noticeId);
+    setIsAlertOpen(true);
+  }
 
   const pinnedNotices = notices?.filter((n) => n.pinned) || [];
   const otherNotices = notices?.filter((n) => !n.pinned) || [];
+
+  const NoticeCard = ({ notice }: { notice: any }) => {
+    const isAuthor = user && user.uid === notice.authorId;
+
+    return (
+      <Card
+        key={notice.id}
+        className={`rounded-xl shadow-sm ${notice.pinned ? 'border-primary/50' : ''}`}
+      >
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div className='flex-1'>
+               <Link href={`/notices/${notice.id}`}>
+                <CardTitle className="font-headline text-lg hover:underline">
+                  {notice.title}
+                </CardTitle>
+              </Link>
+              <CardDescription>
+                By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-1">
+              {notice.pinned && (
+                <Badge
+                  variant="secondary"
+                  className="bg-accent/30 text-accent-foreground flex items-center gap-1"
+                >
+                  <Pin className="h-3 w-3" />
+                  Pinned
+                </Badge>
+              )}
+              {isAuthor && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onSelect={() => openDeleteConfirm(notice.id)} className="text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="prose prose-sm text-foreground max-h-20 overflow-hidden relative">
+            <div dangerouslySetInnerHTML={{ __html: notice.body }} />
+            {notice.body.length > 200 && (
+              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream to-transparent" />
+            )}
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button variant="link" asChild className="p-0 h-auto">
+            <Link href={`/notices/${notice.id}`}>Read more</Link>
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
 
   return (
     <div className="p-4 space-y-4">
@@ -125,63 +222,19 @@ export default function NoticesPage() {
       {isLoading && <p>Loading notices...</p>}
 
       {pinnedNotices.map((notice) => (
-        <Card
-          key={notice.id}
-          className="rounded-xl shadow-md border-primary/50"
-        >
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <Link href={`/notices/${notice.id}`}>
-                <CardTitle className="font-headline text-lg hover:underline">
-                  {notice.title}
-                </CardTitle>
-              </Link>
-              <Badge
-                variant="secondary"
-                className="bg-accent/30 text-accent-foreground flex items-center gap-1"
-              >
-                <Pin className="h-3 w-3" />
-                Pinned
-              </Badge>
-            </div>
-            <CardDescription>
-              By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div
-              className="prose prose-sm text-foreground"
-              dangerouslySetInnerHTML={{ __html: notice.body }}
-            />
-          </CardContent>
-        </Card>
+        <NoticeCard key={notice.id} notice={notice} />
       ))}
 
       {otherNotices.map((notice) => (
-        <Card key={notice.id} className="rounded-xl shadow-sm">
-          <CardHeader>
-             <Link href={`/notices/${notice.id}`}>
-                <CardTitle className="font-headline text-lg hover:underline">
-                  {notice.title}
-                </CardTitle>
-              </Link>
-            <CardDescription>
-              By {notice.authorName} on {format(new Date(notice.createdAt), 'PPP')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm text-foreground max-h-20 overflow-hidden relative">
-              <div dangerouslySetInnerHTML={{ __html: notice.body }} />
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-cream to-transparent" />
-            </div>
-          </CardContent>
-           <CardFooter>
-            <Button variant="link" asChild className="p-0 h-auto">
-              <Link href={`/notices/${notice.id}`}>Read more</Link>
-            </Button>
-          </CardFooter>
-        </Card>
+        <NoticeCard key={notice.id} notice={notice} />
       ))}
+      
+      {(notices?.length || 0) === 0 && !isLoading && (
+        <div className="text-center py-10">
+          <p className="text-muted-foreground">No notices yet.</p>
+        </div>
+      )}
+
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
@@ -197,6 +250,21 @@ export default function NoticesPage() {
           <NewNoticeForm setDialogOpen={setIsDialogOpen} />
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this notice.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedNoticeId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
