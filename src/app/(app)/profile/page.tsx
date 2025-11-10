@@ -160,9 +160,9 @@ export default function ProfilePage() {
           </div>
         </div>
         <div className="flex gap-2 mt-2">
-            <Badge variant="outline">Roll: {userRoll || 'N/A'}</Badge>
+            <Badge variant="secondary">Roll: {userRoll || 'N/A'}</Badge>
             <Badge variant="secondary">Role: {userRole}</Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
+            <Badge variant="secondary" className="flex items-center gap-1">
               <BookOpen className="h-3 w-3" />
               Sem: {userSemester}
             </Badge>
