@@ -46,8 +46,9 @@ export default function HomePage() {
         setQuestion(questionResult);
       } catch (error) {
         console.error("Failed to fetch content:", error);
+        // Fallback content in case of AI failure
         setQuote({ quote: "The best way to predict the future is to create it.", author: "Abraham Lincoln" });
-        setQuestion({ question: "What is the powerhouse of the cell?", category: 'engineering' });
+        setQuestion({ question: "Explain the difference between a mutex and a semaphore.", category: 'coding' });
       } finally {
         setIsLoading(false);
       }

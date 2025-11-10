@@ -24,14 +24,14 @@ export async function generateHourlyQuestion(): Promise<HourlyQuestionOutput> {
 const prompt = ai.definePrompt({
   name: 'hourlyQuestionPrompt',
   output: {schema: HourlyQuestionOutputSchema},
-  prompt: `You are an AI that provides a challenging and engaging educational question for a university-level engineering or computer science student.
-  
-  Randomly choose to generate one of the following:
-  1. A challenging engineering question (e.g., "Explain the principles of a cantilever beam and how to calculate its deflection under a point load.").
-  2. A difficult coding or algorithm problem (e.g., "Given an array of n non-negative integers representing an elevation map where the width of each bar is 1, compute how much rainwater it can trap after a rain.").
-  3. A complex math problem involving calculus, linear algebra, or discrete mathematics (e.g., "Find the eigenvalues and eigenvectors of the matrix A = [[4, 1], [2, 3]].").
-  
-  Ensure the content is concise but challenging. Do not repeat yourself. Provide a different response each time.`,
+  prompt: `You are an AI that provides a challenging and engaging educational question for a university-level engineering or computer science student. Your task is to generate one question from one of the specified categories.
+
+Choose one of the following categories and create a suitable question:
+1.  **Engineering**: A challenging conceptual or applied problem in a core engineering discipline (e.g., "Explain the principles of a cantilever beam and how to calculate its deflection under a point load.").
+2.  **Coding**: A difficult algorithm or data structure problem, similar to those found in technical interviews (e.g., "Given an array of n non-negative integers representing an elevation map where the width of each bar is 1, compute how much rainwater it can trap after a rain.").
+3.  **Math**: A complex problem involving calculus, linear algebra, or discrete mathematics (e.g., "Find the eigenvalues and eigenvectors of the matrix A = [[4, 1], [2, 3]].").
+
+Ensure the content is concise but challenging. Do not repeat yourself. Provide a different response each time.`,
 });
 
 const generateHourlyQuestionFlow = ai.defineFlow(
