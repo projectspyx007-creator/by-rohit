@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -43,8 +44,10 @@ export default function ProfilePage() {
     if (typeof window !== 'undefined' && 'Notification' in window) {
       setNotificationPermission(Notification.permission);
     }
+    // Correctly set the toggle state based on the user's profile setting from the database.
     if (userProfile) {
-      setNotificationsEnabled(userProfile.notifications && Notification.permission === 'granted');
+      // The `notifications` field can be undefined for older users, default to true for the UI.
+      setNotificationsEnabled(userProfile.notifications ?? true);
     }
   }, [userProfile]);
 
