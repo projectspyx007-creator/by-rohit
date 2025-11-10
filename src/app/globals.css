@@ -36,33 +36,33 @@
   }
 
   .dark {
-    --background: 28 10% 4%; /* Near-black coffee */
-    --foreground: 30 25% 92%; /* Off-white cream */
+    --background: 20 10% 6%; /* #0F0E0C - Rich coffee-black */
+    --foreground: 37 58% 90%; /* #F4E9D8 - Soft cream */
 
-    --card: 28 10% 8%; /* Slightly lighter than background */
-    --card-foreground: 30 25% 92%;
+    --card: 20 8% 9%; /* #1A1816 - Lighter coffee-black */
+    --card-foreground: 37 58% 90%; /* #F4E9D8 - Soft cream */
 
-    --popover: 28 10% 4%;
-    --popover-foreground: 30 25% 92%;
+    --popover: 20 8% 9%; /* #1A1816 */
+    --popover-foreground: 37 58% 90%;
 
-    --primary: 28 50% 28%; /* Main Coffee color */
-    --primary-foreground: 37 68% 91%; /* Cream */
-    
-    --secondary: 28 35% 48%; /* Light Brown */
-    --secondary-foreground: 37 68% 98%;
+    --primary: 28 39% 40%; /* #8B5E3C - Warm coffee brown */
+    --primary-foreground: 37 58% 90%; /* #F4E9D8 - Soft cream */
 
-    --muted: 28 10% 12%;
-    --muted-foreground: 30 15% 60%;
+    --secondary: 38 23% 71%; /* #C7B9A4 - Muted warm brown-gray */
+    --secondary-foreground: 20 10% 6%;
 
-    --accent: 28 35% 48%; /* Light Brown */
-    --accent-foreground: 37 68% 98%;
+    --muted: 20 8% 13%; /* #221F1C */
+    --muted-foreground: 38 23% 71%; /* #C7B9A4 - Muted warm brown-gray */
+
+    --accent: 28 39% 40%; /* #8B5E3C - Warm coffee brown */
+    --accent-foreground: 37 58% 90%;
 
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 28 10% 15%;
-    --input: 28 10% 12%;
-    --ring: 28 35% 48%; /* Light Brown */
+    --border: 20 8% 15%; /* #2C2A26 - Subtle border */
+    --input: 20 8% 15%;
+    --ring: 28 39% 40%; /* #8B5E3C */
   }
 }
 
