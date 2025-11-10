@@ -5,8 +5,8 @@ import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'Coffee Campus',
-  description: 'Brew Your College Life ☕',
+  title: 'College Companion',
+  description: 'Your Ultimate College Assistant Companion',
 };
 
 export default function RootLayout({

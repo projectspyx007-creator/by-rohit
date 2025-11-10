@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="mb-6 flex justify-center">
           <Link href="/" className="flex items-center gap-2 text-primary">
             <Icons.Coffee className="h-8 w-8" />
-            <span className="font-headline text-3xl font-bold">Coffee Campus</span>
+            <span className="font-headline text-3xl font-bold">College Companion</span>
           </Link>
         </div>
         {children}

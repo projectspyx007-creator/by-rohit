@@ -14,7 +14,7 @@ export default function SignInPage() {
     <Card className="rounded-2xl shadow-lg">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Welcome Back!</CardTitle>
-        <CardDescription>Sign in to continue to your campus brew.</CardDescription>
+        <CardDescription>Sign in to continue to College Companion.</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense>

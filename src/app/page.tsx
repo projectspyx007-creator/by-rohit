@@ -10,10 +10,10 @@ export default function LandingPage() {
       </div>
       <div className="z-10 flex flex-col items-center text-center p-4">
         <h1 className="font-headline text-5xl md:text-7xl font-bold text-primary">
-          Coffee Campus
+          College Companion
         </h1>
         <p className="mt-2 text-lg md:text-xl text-foreground">
-          Brew Your College Life ☕
+          Your Ultimate College Assistant Companion
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4 w-full max-w-xs">
           <Button asChild className="w-full" size="lg">

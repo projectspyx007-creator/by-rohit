@@ -24,7 +24,7 @@ export function ChatInput({ onSend, isPending }: ChatInputProps) {
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <Input
         type="text"
-        placeholder="Ask the coach..."
+        placeholder="Ask your companion..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
         disabled={isPending}

@@ -21,7 +21,7 @@ export function ChatView({ timetable, notices }: ChatViewProps) {
     {
       id: "init",
       role: "assistant",
-      text: "Hi! I'm your Coffee Coach ☕. Ask me anything about your classes, notices, or just what's happening on campus!",
+      text: "Hi! I'm your College Companion 🤖. Ask me anything about your classes, notices, or just what's happening on campus!",
     },
   ]);
   const [isPending, setIsPending] = useState(false);

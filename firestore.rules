@@ -1,5 +1,5 @@
 /**
- * @fileoverview Firestore Security Rules for the Coffee Campus application.
+ * @fileoverview Firestore Security Rules for the College Companion application.
  *
  * Core Philosophy:
  * This ruleset enforces a user-ownership model for private data (timetables, chat messages, notifications)

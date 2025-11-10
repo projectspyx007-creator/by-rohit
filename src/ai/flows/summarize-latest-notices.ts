@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Summarizes the latest notices for the Coffee Coach.
+ * @fileOverview Summarizes the latest notices for the College Companion.
  *
  * - summarizeLatestNotices - A function that summarizes the latest notices.
  * - SummarizeLatestNoticesInput - The input type for the summarizeLatestNotices function.
@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   name: 'summarizeLatestNoticesPrompt',
   input: {schema: SummarizeLatestNoticesInputSchema},
   output: {schema: SummarizeLatestNoticesOutputSchema},
-  prompt: `You are Coffee Coach ☕, providing summaries of the latest notices to students.
+  prompt: `You are College Companion 🤖, providing summaries of the latest notices to students.
 
 Summarize the following notices in under 100 words, being helpful and concise:
 

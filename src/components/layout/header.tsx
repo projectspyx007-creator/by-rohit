@@ -6,7 +6,7 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 bg-background/80 backdrop-blur-sm shadow-sm z-50 h-14 flex items-center justify-between px-4 border-b">
       <Link href="/home" className="font-headline text-lg font-bold text-primary">
-        Coffee Campus
+        College Companion
       </Link>
       <div className="flex items-center gap-2 sm:gap-4">
         <Button variant="ghost" size="icon" className="h-8 w-8">

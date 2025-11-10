@@ -78,7 +78,7 @@ export default function HomePage() {
             {greeting}, {userName}!
           </h2>
           <p className="text-sm text-muted-foreground">
-            Here&apos;s your campus brew for today.
+            Here's your daily briefing.
           </p>
         </CardContent>
       </Card>
