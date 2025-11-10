@@ -36,33 +36,33 @@
   }
 
   .dark {
-    --background: 28 44% 12%; /* Dark Coffee */
-    --foreground: 37 68% 91%; /* Cream */
+    --background: 28 10% 4%; /* Near-black coffee */
+    --foreground: 30 25% 92%; /* Off-white cream */
 
-    --card: 28 44% 12%;
-    --card-foreground: 37 68% 91%;
+    --card: 28 10% 8%; /* Slightly lighter than background */
+    --card-foreground: 30 25% 92%;
 
-    --popover: 28 44% 12%;
-    --popover-foreground: 37 68% 91%;
+    --popover: 28 10% 4%;
+    --popover-foreground: 30 25% 92%;
 
-    --primary: 37 68% 91%; /* Cream */
-    --primary-foreground: 28 50% 28%; /* Coffee */
+    --primary: 28 50% 28%; /* Main Coffee color */
+    --primary-foreground: 37 68% 91%; /* Cream */
+    
+    --secondary: 28 35% 48%; /* Light Brown */
+    --secondary-foreground: 37 68% 98%;
 
-    --secondary: 28 30% 20%;
-    --secondary-foreground: 37 68% 91%;
-
-    --muted: 28 30% 25%;
-    --muted-foreground: 37 30% 70%;
+    --muted: 28 10% 12%;
+    --muted-foreground: 30 15% 60%;
 
     --accent: 28 35% 48%; /* Light Brown */
     --accent-foreground: 37 68% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 28 30% 30%;
-    --input: 28 30% 25%;
-    --ring: 28 35% 48%;
+    --border: 28 10% 15%;
+    --input: 28 10% 12%;
+    --ring: 28 35% 48%; /* Light Brown */
   }
 }
 
