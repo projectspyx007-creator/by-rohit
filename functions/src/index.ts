@@ -31,7 +31,9 @@ export const createNotificationOnNewNotice = functions.firestore
         const userProfile = userDoc.data();
         
         // Only send notification if user has them enabled in their profile
+        // This now correctly handles cases where 'notifications' might be undefined
         if (userProfile.notifications === false) {
+            functions.logger.log(`Skipping notification for user ${userId} because they have disabled them.`);
             return;
         }
 
