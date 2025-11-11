@@ -48,22 +48,19 @@ export default function ProfilePage() {
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
 
-    // Immediately update the UI and save the preference
-    setNotificationsEnabled(checked);
     setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
-
+    setNotificationsEnabled(checked);
+    
     if (checked) {
-      // User turned notifications ON - show a green/standard toast
       toast({
         title: "Notifications Enabled",
-        description: "You will now receive reminders for your classes.",
+        description: "You will now receive class reminders and updates.",
       });
     } else {
-      // User turned notifications OFF - show a red/destructive toast
       toast({
         variant: "destructive",
         title: "Notifications Disabled",
-        description: "You will no longer receive class reminders.",
+        description: "You will no longer receive reminders.",
       });
     }
   };
@@ -167,14 +164,6 @@ export default function ProfilePage() {
               checked={theme === 'dark'}
               onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
             />
-          </div>
-          <Separator />
-          <div className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 cursor-pointer">
-            <div className="flex items-center gap-3">
-              <ShieldCheck className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">Account & Security</span>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
           </div>
         </CardContent>
       </Card>
