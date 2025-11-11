@@ -8,11 +8,11 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { useUser, useFirestore, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
+import { Button } from '@/components/ui/button';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, doc, orderBy, query, writeBatch } from 'firebase/firestore';
-import { useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { Bell, BellRing } from 'lucide-react';
+import { Bell, BellRing, CheckCheck } from 'lucide-react';
 
 type Notification = {
   id: string;
@@ -40,22 +40,21 @@ export function NotificationPanel({
   }, [user, firestore]);
 
   const { data: notifications, isLoading } = useCollection<Notification>(notificationsQuery);
+  const unreadCount = notifications?.filter(n => !n.read).length || 0;
 
-  useEffect(() => {
-    // Mark all notifications as read when the panel opens
-    if (isOpen && notifications && firestore && user) {
-      const unread = notifications.filter((n) => !n.read);
-      if (unread.length > 0) {
-        const batch = writeBatch(firestore);
-        unread.forEach((notification) => {
-          const notifRef = doc(firestore, `users/${user.uid}/notifications`, notification.id);
-          batch.update(notifRef, { read: true });
-        });
-        batch.commit().catch(console.error);
-      }
+  const handleMarkAllAsRead = () => {
+    if (unreadCount > 0 && notifications && firestore && user) {
+      const batch = writeBatch(firestore);
+      notifications.forEach((notification) => {
+        if (!notification.read) {
+            const notifRef = doc(firestore, `users/${user.uid}/notifications`, notification.id);
+            batch.update(notifRef, { read: true });
+        }
+      });
+      batch.commit().catch(console.error);
     }
-  }, [isOpen, notifications, firestore, user]);
-
+  };
+  
   const formatTimestamp = (timestamp: Notification['createdAt']) => {
     if (!timestamp) return '';
     
@@ -81,6 +80,18 @@ export function NotificationPanel({
             Here are your latest updates from campus.
           </SheetDescription>
         </SheetHeader>
+         {notifications && notifications.length > 0 && unreadCount > 0 && (
+          <div className="px-1 -mx-6">
+            <Button
+              variant="link"
+              onClick={handleMarkAllAsRead}
+              className="text-sm text-primary"
+            >
+              <CheckCheck className="mr-2 h-4 w-4" />
+              Mark all as read
+            </Button>
+          </div>
+        )}
         <div className="flex-1 overflow-y-auto custom-scrollbar -mx-6 px-6">
           {isLoading && <p className="text-center text-muted-foreground p-4">Loading...</p>}
           {!isLoading && (!notifications || notifications.length === 0) && (
