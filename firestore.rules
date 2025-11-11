@@ -25,9 +25,9 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper function to check if a user is an admin by their UID.
-    // The UID 'gHZ9n7s2b9X8fJ2kP3s5t8YxVOE2' corresponds to ad24b1053@iiitr.ac.in
+    // The UID 'FCRlkEk6muMDar3gnNoQfxoqc903' corresponds to ad24b1053@iiitr.ac.in
     function isAdmin() {
-      return request.auth.uid == 'gHZ9n7s2b9X8fJ2kP3s5t8YxVOE2';
+      return request.auth.uid == 'FCRlkEk6muMDar3gnNoQfxoqc903';
     }
 
     // Users can only access their own profile data.
