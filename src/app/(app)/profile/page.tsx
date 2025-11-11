@@ -41,16 +41,21 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (userProfile) {
+      // Default to false if userProfile.notifications is undefined
       setNotificationsEnabled(userProfile.notifications ?? false);
     }
   }, [userProfile]);
-
+  
   const handleNotificationToggle = async (checked: boolean) => {
     if (!userRef) return;
-
-    setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
+  
+    // Immediately update the UI state
     setNotificationsEnabled(checked);
-    
+  
+    // Save the preference to Firestore
+    setDocumentNonBlocking(userRef, { notifications: checked }, { merge: true });
+  
+    // Show a toast message based on the new state
     if (checked) {
       toast({
         title: "Notifications Enabled",
@@ -64,7 +69,7 @@ export default function ProfilePage() {
       });
     }
   };
-  
+
   const handleSignOut = async () => {
     try {
       if (auth) {
