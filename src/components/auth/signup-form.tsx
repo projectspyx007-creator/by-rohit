@@ -126,11 +126,14 @@ export function SignUpForm() {
         const userDoc = await getDoc(userDocRef);
         
         if (!userDoc.exists()) {
+           // This is a new user, create their profile with default notification settings
            await handleUserCreation(user, {
                name: user.displayName || "New User",
                email: user.email || ""
+               // Roll number and semester will be empty, user can update later
            });
         } else {
+            // Existing user, just log them in
             router.push("/home");
         }
       }
